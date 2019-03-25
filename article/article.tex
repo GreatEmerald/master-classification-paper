@@ -15,6 +15,15 @@
 \usepackage{hyperxmp} % Import license metadata
 \usepackage{titling} % Get the author for the metadata
 
+% Track changes package, remove when final; using a drop-in rather than the old version in TeX Live
+% Usage: \added \deleted \replaced{new}{old} \highlight \comment
+% Each followed by [id=<your id>, comment={Comment, optional}]
+\usepackage[xcolor={usenames,dvipsnames}]{changes}
+\definechangesauthor[color=OliveGreen]{dm}
+\definechangesauthor[color=NavyBlue]{jv}
+\definechangesauthor[color=Purple]{nt}
+\definechangesauthor[color=Mahogany]{mh}
+
 % My own definition for the sections that start with a bold name but don't appear in TOC
 \newcommand{\minisection}[1]{\medskip \textbf{#1:}}
 
@@ -43,7 +52,7 @@
 
 \linenumbers
 
-\abstract{The current standard of land cover classification is to assign each pixel to one land cover class, which at coarse resolution causes loss of information about mixed land cover. Fuzzy land cover classification, which assigns fractions of each land cover class to each pixel, can deal with mixed pixels. However, so far its application has been limited to city-scale areas, four or fewer classes, and up to two algorithm comparisons. In this paper, the classification accuracy and processing speed were compared for three fuzzy classification machine learning algorithms: random forest regression, fuzzy \textit{c}-means and neural networks. The algorithms were used to classify the whole boreal-temperate forest gradient zone between Finland and Lithuania into nine land cover classes. Results showed that all of the tested algorithms are able to achieve similarly high classification accuracy. Random forest regression accuracy was the highest, but its processing speed was the lowest. The results are a milestone for creating a global fuzzy land cover classification product incorporating user-specific requirements.
+\abstract{\comment[id=dm]{From the Master, will replace later}The current standard of land cover classification is to assign each pixel to one land cover class, which at coarse resolution causes loss of information about mixed land cover. Fuzzy land cover classification, which assigns fractions of each land cover class to each pixel, can deal with mixed pixels. However, so far its application has been limited to city-scale areas, four or fewer classes, and up to two algorithm comparisons. In this paper, the classification accuracy and processing speed were compared for three fuzzy classification machine learning algorithms: random forest regression, fuzzy \textit{c}-means and neural networks. The algorithms were used to classify the whole boreal-temperate forest gradient zone between Finland and Lithuania into nine land cover classes. Results showed that all of the tested algorithms are able to achieve similarly high classification accuracy. Random forest regression accuracy was the highest, but its processing speed was the lowest. The results are a milestone for creating a global fuzzy land cover classification product incorporating user-specific requirements.
 
 \minisection{Keywords} Fuzzy land cover classification, machine learning, random forest, gradient boosting, neural networks, fuzzy c-means, PROBA-V}
 
@@ -55,6 +64,8 @@
  \item Available fractional methods that were introduced in literature (wavelet transform etc.)
  \item Methods that are tested in this paper
 \end{enumerate}
+
+\added[id=dm]{\textbf{Objectives}}
 
 \section{Materials and Methods}
 
