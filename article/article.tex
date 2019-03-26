@@ -14,12 +14,14 @@
 \usepackage[colorlinks, allcolors=blue, unicode]{hyperref}
 \usepackage{hyperxmp} % Import license metadata
 \usepackage{titling} % Get the author for the metadata
+\usepackage{textcomp} % \texttimes
 
 % Track changes package, remove when final; using a drop-in rather than the old version in TeX Live
-% Usage: \added \deleted \replaced{new}{old} \highlight \comment
-% Each followed by [id=<your id>, comment={Comment, optional}]
+% Usage: \added, \deleted, \replaced{new}{old}, \highlight, \comment
+% All followed by an optional [id=<your id>, comment=<some comment>]
 \usepackage[xcolor={usenames,dvipsnames}]{changes}
-\definechangesauthor[color=OliveGreen]{dm}
+\definecolor{gem}{HTML}{003300}
+\definechangesauthor[color=gem]{dm}
 \definechangesauthor[color=NavyBlue]{jv}
 \definechangesauthor[color=Purple]{nt}
 \definechangesauthor[color=Mahogany]{mh}
@@ -30,7 +32,9 @@
 
 % Metadata
 \title{Fractional land cover classification method assessment using PROBA-V satellite data}
-\author{Dainius Masiliūnas, Nandin-Erdene Tsendbazar, Jan Verbesselt, Martin Herold}
+\author{Dainius Masiliūnas, Nandin-Erdene Tsendbazar, Martin Herold, \\ Myroslava Lesiv, Jan Verbesselt}
+% * <Dainius Masiliūnas> 11:20:08 26 Mar 2019 UTC+0100:
+% TODO: fix newline issue
 
 \hypersetup{
     pdflicenseurl={http://creativecommons.org/licenses/by-sa/4.0/},
@@ -52,9 +56,28 @@
 
 \linenumbers
 
-\abstract{\comment[id=dm]{From the Master, will replace later}The current standard of land cover classification is to assign each pixel to one land cover class, which at coarse resolution causes loss of information about mixed land cover. Fuzzy land cover classification, which assigns fractions of each land cover class to each pixel, can deal with mixed pixels. However, so far its application has been limited to city-scale areas, four or fewer classes, and up to two algorithm comparisons. In this paper, the classification accuracy and processing speed were compared for three fuzzy classification machine learning algorithms: random forest regression, fuzzy \textit{c}-means and neural networks. The algorithms were used to classify the whole boreal-temperate forest gradient zone between Finland and Lithuania into nine land cover classes. Results showed that all of the tested algorithms are able to achieve similarly high classification accuracy. Random forest regression accuracy was the highest, but its processing speed was the lowest. The results are a milestone for creating a global fuzzy land cover classification product incorporating user-specific requirements.
+\abstract{
+The current common practice for producing global land cover maps is to represent land cover classes as discrete units, e.g. a pixel may be labelled as grassland, tree cover, or open water. However, in reality, the area covered by the pixel is hardly ever homogeneous, it may be e.g. trees surrounded by grass next to water. This mismatch between the reality and its representation in maps causes a loss in precision, as only the dominant land cover class can be represented in such ``hard'' classification maps. This problem is worse for coarse resolution land cover maps. A common workaround to this issue is to define mosaic classes, i.e. land cover classes that are combinations of other land cover classes, such as open forest (combination of grassland and tree cover). However, this approach leads to increasingly complex map legends and confusion about the definitions.
 
-\minisection{Keywords} Fuzzy land cover classification, machine learning, random forest, gradient boosting, neural networks, fuzzy c-means, PROBA-V}
+Our proposed solution to this issue is to employ fractional land cover mapping: for each pixel, define the proportion of the pixel that each considered land cover class occupies. This allows expressing an open forest as e.g. 40\% grassland, 60\% tree cover, and 0\% of the rest of the land cover classes. This ``fuzzy'' classification not only allows to more precisely express the land cover that exists in reality, but also gives users the flexibility to derive their own maps with a customised legend. For instance, if a user defines open forest as one that has less than 50\% tree cover and at least 30\% of grassland, they can generate a map with this definition from land cover fraction data, rather than relying on the definition that the mapmakers provide.
+Exhaustive land cover fraction data is desired by a number of user communities, but to date there is no single global nor continental scale map that would provide fractions of each common land cover class.
+
+In this paper, we tested the application of fractional land cover mapping over the continent of Africa. We compared the performance of four very different machine learning algorithms: random forest regression, multilayer perceptron neural networks, partial least squares regression, fuzzy nearest prototype classification and logistic regression. In order to allow the algorithms to make good predictions about land cover fractions, six types of covariates were used: spectral bands and vegetation indices derived from the Proba-V 100 m TOC reflectance data; temporal features derived from the full time series of said imagery; terrestrial features from a digital elevation model; soil properties and climate data from global models, and location. We compared the contribution of each of the covariate types to improving the accuracy of the model predictions.
+
+One challenge when dealing with fractional data is the data imbalance: in most locations, only a single or a few classes dominate a pixel, with the rest taking up 0\% of the pixel. Values at the extremes (0\% and 100\%, i.e. pure pixels) are difficult for machine learning algorithms to estimate. We propose a new solution to this problem by combining three models: two classification models and one regression model. The first classification model determines whether a pixel is pure, and if so, it is processed using a classification model, otherwise it is processed with a regression model.
+
+% Validation
+% - 28k points
+% - Independent training and validation sets
+
+The models were trained on 26668 training points throughout Africa. The training points, collected as part of the Copernicus Global Land System: Dynamic Land Cover (CGLS-LC100) project, describe the fraction that each land cover class (bare soil, crops, grassland, shrubs, trees, urban/built-up, water and wetlands) occupies within a 100\texttimes100 m area, which is aligned to the grid used for Proba-V 100 m products. After the models were trained, their land cover class fraction predictions were compared with an independent validation set of 3617 points, which are likewise aligned to the Proba-V grid. Overall as well as per-class RMSE, MAE, and ME statistics were used to compare the models. In addition, the subpixel confusion-uncertainty matrix was used to analyse which classes were the most difficult to separate for each model, as well as to derive overall, users' and producers' accuracies and the kappa statistic. The models were compared with each other, as well as against a control intercept-only model.
+
+Preliminary results show that the three-model approach increases the overall accuracy of the predictions by more accurately modelling the extreme values. From the machine learning models that were compared, random forest regression reaches the highest overall accuracy of 71\%. This is comparable to the reported accuracies of the current ``hard'' global land cover maps. Covariate importance analysis shows that spectral covariates are the most important for predicting land cover fractions, followed by the location, terrestrial and temporal covariates.
+
+The application of the method on data gathered throughout Africa shows the applicability of the method to a variety of land cover conditions, ranging from highly heterogeneous agricultural landscapes to homogeneous bodies of water. Given enough reference data from other parts of the world and enough computational power, the method could be applied globally to upscale it to a global fractional land cover map. Such a map would cater to users with different fields of focus. Among other benefits, more precise estimation of land cover allows for 1) improved climate models to help reach Sustainable Development Goals (for which land cover is a key variable), 2) facilitate the making of models for vegetation and urban area dynamics, and 3) help governments and land owners keep better track of relevant land cover and its change. In addition, this work contributes to the operationalisation of the CGLS-LC100 project, which aims to produce exhaustive global land cover fractions as an operational product.
+
+\minisection{Keywords} Fuzzy land cover classification, machine learning, random forest, gradient boosting, neural networks, fuzzy c-means, PROBA-V
+}
 
 \section{Introduction}
 
@@ -65,7 +88,16 @@
  \item Methods that are tested in this paper
 \end{enumerate}
 
-\added[id=dm]{\textbf{Objectives}}
+\added[id=dm]{
+\textbf{Objectives}:
+}
+
+\begin{enumerate}
+ \item Compare the performance of a variety of machine learning models for a continental-scale fractional land cover mapping task
+ \item Compare the importance of covariates and covariate groups for the prediction of land cover fractions
+ \item Investigate methods for reducing bias in the predictions with regards to zero inflation and predictions tending towards the mean
+\end{enumerate}
+
 
 \section{Materials and Methods}
 
@@ -73,27 +105,30 @@
 
 Description of the CGLOPS data, mentioning the balance and zero inflation problems, and the fact that the study area is Africa
 
-\subsection{Preprocessing}
-
-Not sure whether this should be its own section or just mentioned at the top:
-
-\begin{enumerate}
- \item Temporal cloud filter for Proba-V
- \item Harmonic metrics extraction
- \item Terrain metrics calculation
-\end{enumerate}
-
 \subsection{Covariates/Features}
 
 \begin{enumerate}
  \item GLSDEM
  \item Proba-V time series
- \item Perhaps also soil/climate data
+ \item SoilGrids and LandGIS
+ \item WorldClim
+\end{enumerate}
+
+\subsection{Preprocessing}
+
+\begin{enumerate}
+ \item Temporal cloud filter for Proba-V
+ \item Harmonic metrics extraction
+ \item Terrain metrics calculation
+ \item Additional climate parameter calculation
+ \item Manual model feature selection
 \end{enumerate}
 
 \subsection{Fractional land cover mapping methods}
 
 \subsubsection{Logistic regression}
+
+\subsubsection{Lasso/ridge/elastic net regression}
 
 \subsubsection{Partial least squares regression}
 
@@ -107,16 +142,16 @@ AKA multilayer perceptron
 
 Including variable importance
 
-...and possibly more methods
-
 \subsection{Validation/Accuracy Assessment}
 
 Not sure if this should be a section, or just part of results:
 
 \begin{enumerate}
- \item RMSE per class
- \item Sub-pixel confusion-uncertainty matrix
- \item Comparison with a control/intercept model (10\% of everything)
+ \item RMSE, MAE, ME per class
+ \item Sub-pixel confusion-uncertainty matrix: kappa, OA, PA, UA
+ \item Correlation matrix
+ \item Prediction accuracy at different parts of the predicted vs observed line
+ \item Comparison with a control/intercept model (10\% of everything)?
 \end{enumerate}
 
 \section{Results}
@@ -125,18 +160,19 @@ Not sure if this should be a section, or just part of results:
  \item RMSE per class comparison: no big differences
  \item Subpixel confusion matrix metrics: quite a big difference
  \item RF variable importance
- \item Truth:prediction scatterplots
+ \item Truth:prediction scatterplots (hex/box/bar)
+ \item Point map of Africa for the different classes
 \end{enumerate}
 
 \section{Discussion}
 
 \begin{enumerate}
- \item Fraction area accuracy goes up to 70\%, that is good considering that hard classification is not much better than that
+ \item Fraction area accuracy goes up to 72\%, that is good considering that hard classification is not much better than that
  \item RF is the best, even though one model per class means that it does not take everything into account
  \item Accuracy assessment metric makes a big difference, useful to use subpixel confusion matrix for that
- \item Grasslands are hard to discern, water is easy, very few wetlands in Africa
- \item All covariates are important, problem may be getting more of them for the whole world
- \item Recommendations: more covariates, a fuzzy machine learning method that can deal with zeroes
+ \item Hardest to classify are grasslands and especially shrubs and urban
+ \item All covariates are important to a certain degree (show table of importances)
+ \item Histogram matching doesn't help any
 \end{enumerate}
 
 \section{Conclusions}
@@ -144,14 +180,15 @@ Not sure if this should be a section, or just part of results:
 \begin{enumerate}
  \item Random forest is the best by some margin
  \item Subpixel confusion matrix is useful for differentiation
- \item All covariates are important
+ \item All covariates are important but to a different degree
+ \item Using a multi-model approach improves MAE at the cost of RMSE, thus a trade-off
 \end{enumerate}
 
 \minisection{Author Contributions} Something
 
-\minisection{Funding} Something
+\minisection{Funding} JRC CGLOPS
 
-\minisection{Acknowledgements} Something
+\minisection{Acknowledgements} VITO
 
 \minisection{Conflicts of Interest} The authors declare no conflict of interest.
 
