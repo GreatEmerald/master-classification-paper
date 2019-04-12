@@ -3,4 +3,6 @@
 *.out
 *.pdf
 *.synctex.gz
+*.loc
+*.soc
 changes

@@ -15,6 +15,8 @@
 \usepackage{hyperxmp} % Import license metadata
 \usepackage{titling} % Get the author for the metadata
 \usepackage{textcomp} % \texttimes
+\usepackage[pdf]{graphviz} % Importing dot files; can be replaced with generated PDFs
+%\usepackage{dot2texi}
 
 % Track changes package, remove when final; using a drop-in rather than the old version in TeX Live
 % Usage: \added, \deleted, \replaced{new}{old}, \highlight, \comment
@@ -123,6 +125,12 @@ Description of the CGLOPS data, mentioning the balance and zero inflation proble
  \item Additional climate parameter calculation
  \item Manual model feature selection
 \end{enumerate}
+
+\begin{figure}
+ \inputdigraph[width=\textwidth]{article-figures/algorithms}{dot}
+ \caption{Preprocessing chain.}
+\end{figure}
+
 
 \subsection{Fractional land cover mapping methods}
 
