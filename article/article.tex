@@ -8,6 +8,7 @@
 \usepackage{microtype}
 \usepackage{amsmath}
 \usepackage{indentfirst}
+\usepackage{booktabs} % For \toprule, etc.
 
 % Custom packages
 \usepackage[acronym,toc,shortcuts,nohypertypes=acronym]{glossaries}
@@ -48,6 +49,13 @@
 
 % Acronyms - cite with \ac{}
 \newacronym{GNSS}{GNSS}{Global Navigation Satellite System}
+\newacronym{OA}{OA}{Overall accuracy}
+\newacronym{UA}{UA}{User accuracy}
+\newacronym{PA}{PA}{Producer accuracy}
+\newacronym{RMSE}{RMSE}{Root mean squared error}
+\newacronym{MAE}{MAE}{Mean absolute error}
+\newacronym{ME}{ME}{Mean error}
+\newacronym{NSE}{NSE}{Nash–Sutcliffe model efficiency coefficient}
 \makenoidxglossaries
 
 % Use \begin{equation} for maths
@@ -165,8 +173,8 @@ In addition, we investigated applying histogram matching, by matching the histog
 Not sure if this should be a section, or just part of results:
 
 \begin{enumerate}
- \item RMSE, MAE, ME per class
- \item Sub-pixel confusion-uncertainty matrix: kappa, OA, PA, UA
+ \item \ac{RMSE}, \ac{MAE}, \ac{ME} per class
+ \item Sub-pixel confusion-uncertainty matrix: kappa, \ac{OA}, \ac{PA}, \ac{UA}
  \item Correlation matrix
  \item Prediction accuracy at different parts of the predicted vs observed line
  \item Comparison with a control/intercept model (10\% of everything)?
@@ -181,6 +189,46 @@ Not sure if this should be a section, or just part of results:
  \item Truth:prediction scatterplots (hex/box/bar)
  \item Point map of Africa for the different classes
 \end{enumerate}
+
+\subsection{Method accuracy comparison}
+
+The intercept model (always predicting the mean) achieves an \ac{RMSE} of 30\%, and \ac{OA}
+
+Logistic regression achieved RMSE of 18.7\%, MAE of 9.8\%, 
+
+\begin{table}
+\centering
+\begin{tabular}{llllll}
+\toprule
+\textbf{Model} & \textbf{\ac{RMSE} (\%)} & \textbf{\ac{MAE} (\%)} & \textbf{\acrshort{NSE}} & \textbf{\ac{OA} (\%)} & \textbf{Kappa} \\
+\midrule
+Intercept
+& 30    &       &       & 25±4  & 0.1       \\
+Fuzzy nearest centroid
+& 22    &       &       & 49    & 0.41      \\
+Neural networks
+& 19.5  &       &       &       &           \\
+PLS regression
+& 19    &       &       & 47±5  & 0.36±0.07 \\
+Logistic regression
+& 18.7  & 9.8   &       & 66±4  & 0.57      \\
+Lasso regression
+& 18.5  &       &       &       &           \\
+Random forest
+& 16.6  & 9.2   & 0.67  & 68±4  & 0.60      \\
+\ensuremath{''} histogram matched
+& 22.0  & 9.7   & 0.43  & 66±2  & 0.58±0.03 \\
+\ensuremath{''} two-step
+& 18.3  & 8.0   & 0.59  & 72±2  & 0.63      \\
+\ensuremath{''} three-step
+& 18.6  & 8.2   & 0.59  & 71±4  & 0.64      \\
+\ensuremath{''} \ensuremath{''} histogram matched
+& 21.3  & 9.1   & 0.46  & 68±3  & 0.61      \\
+\bottomrule
+\end{tabular}
+\caption{Accuracy statistics of the models tested.}
+\label{tab-accuracy}
+\end{table}
 
 % 1:1 plots
 \begin{figure}
