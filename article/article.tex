@@ -15,8 +15,8 @@
 \usepackage{hyperxmp} % Import license metadata
 \usepackage{titling} % Get the author for the metadata
 \usepackage{textcomp} % \texttimes
-\usepackage[pdf]{graphviz} % Importing dot files; can be replaced with generated PDFs
-%\usepackage{dot2texi}
+%\usepackage[pdf]{graphviz} % Importing dot files; can be replaced with generated PDFs
+\usepackage[norefs,nocites]{refcheck} % Develop: warn if figure is not referenced
 
 % Track changes package, remove when final; using a drop-in rather than the old version in TeX Live
 % Usage: \added, \deleted, \replaced{new}{old}, \highlight, \comment
@@ -130,6 +130,7 @@ Description of the CGLOPS data, mentioning the balance and zero inflation proble
  %\inputdigraph[width=\textwidth]{article-figures/algorithms}{dot}
  \includegraphics[width=\textwidth]{article-figures/algorithms}
  \caption{Preprocessing chain.}
+ \label{fig-preprocessing}
 \end{figure}
 
 
@@ -150,6 +151,14 @@ AKA multilayer perceptron
 \subsubsection{Random forest regression}
 
 Including variable importance
+
+\subsection{Model tuning (multi-step approach) to account for value imbalance}
+
+As the dataset is unbalanced (dominated by zeroes and hundreds) and thus the objective function tends to draw the model towards good prediction of 0/100, whereas in regression the middle is also important. Therefore we tried several approaches to increase the accuracy of the middle predictions.
+
+We compared a single model of the best algorithm, to a two-step approach: one model to predict zeroes, and one model to predict non-zeroes; and a three-step approach, with one model to predict pixel purity (i.e. if we face a classification or a regression problem), one to perform regression (on mixed pixels) and one to perform classification (on pure pixels).
+
+In addition, we investigated applying histogram matching, by matching the histogram of the predictions back to the histogram of the training set.
 
 \subsection{Validation/Accuracy Assessment}
 
@@ -172,6 +181,132 @@ Not sure if this should be a section, or just part of results:
  \item Truth:prediction scatterplots (hex/box/bar)
  \item Point map of Africa for the different classes
 \end{enumerate}
+
+% 1:1 plots
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-points-a001s2}
+    \caption{Random Forest single model prediction correspondence to ground truth (raw points with overplotting).}
+    \label{raw-rf-1m-uncor}
+\end{figure}
+% Binplots
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-point-n100s20}
+    \caption{Random Forest single model prediction correspondence to ground truth, 100x100 bins.}
+    \label{bin-rf-1m-uncor-n100}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-point-n50s20sqrt}
+    \caption{Random Forest single model prediction correspondence to ground truth, 50x50 bins, square root transformation.}
+    \label{bin-rf-1m-uncor-n50sqrt}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-point-n50s10sqrt}
+    \caption{Random Forest single model prediction correspondence to ground truth, 50x50 bins, square root transformation, smaller circle sizes.}
+    \label{bin-rf-1m-uncor-n50sqrts10}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-raster-n50sqrt}
+    \caption{Random Forest single model prediction correspondence to ground truth, square root transformation.}
+    \label{bin-rf-1m-uncor-rastersqrt}
+\end{figure}
+
+% Hexplots
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-1m-uncor-hex}
+    \caption{Random Forest single model prediction correspondence to ground truth.}
+    \label{hex-rf-1m-uncor}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hex}
+    \caption{Random Forest three-step model prediction correspondence to ground truth.}
+    \label{hex-rf-3m-uncor}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-1m-uncor-hm-hex}
+    \caption{Random Forest single model prediction (histogram matched) correspondence to ground truth.}
+    \label{hex-rf-1m-uncor-hm}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hm-hex}
+    \caption{Random Forest three-step model prediction (histogram matched) correspondence to ground truth.}
+    \label{hex-rf-3m-uncor-hm}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hma-hex}
+    \caption{Random Forest three-step model prediction (histogram matched middle, proportionally) correspondence to ground truth.}
+    \label{hex-rf-3m-uncor-hma}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hmb-hex}
+    \caption{Random Forest three-step model prediction (histogram matched non-extremes) correspondence to ground truth.}
+    \label{hex-rf-3m-uncor-hmb}
+\end{figure}
+
+% Boxplots
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/boxplots/2019-03-19-rf-1m-uncor-box}
+    \caption{Random Forest single model prediction correspondence to ground truth.}
+    \label{box-rf-1m-uncor-hm}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/boxplots/2019-03-19-rf-2m-uncor-box}
+    \caption{Random Forest two-step model prediction correspondence to ground truth.}
+    \label{box-rf-2m-uncor-hm}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/boxplots/2019-03-19-rf-3m-uncor-box}
+    \caption{Random Forest three-step model prediction correspondence to ground truth.}
+    \label{box-rf-3m-uncor-hm}
+\end{figure}
+
+% Barplots
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-19-rf-1m-uncor-bar}
+    \caption{Random Forest single model prediction accuracies per class, per predicted magnitude (extremes vs middle)}
+    \label{bar-rf-1m-uncor}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-19-rf-2m-uncor-bar}
+    \caption{Random Forest two-step model prediction accuracies per class, per predicted magnitude (extremes vs middle)}
+    \label{bar-rf-2m-uncor}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-19-rf-3m-uncor-bar}
+    \caption{Random Forest three-step model prediction accuracies per class, per predicted magnitude (extremes vs middle)}
+    \label{bar-rf-3m-uncor}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-22-rf-1m-uncor-hm-bar}
+    \caption{Random Forest single model prediction (histogram matched) accuracies per class, per predicted magnitude (extremes vs middle)}
+    \label{bar-rf-1m-uncor-hm}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-22-rf-3m-uncor-hm-bar}
+    \caption{Random Forest three-step model prediction (histogram matched) accuracies per class, per predicted magnitude (extremes vs middle)}
+    \label{bar-rf-3m-uncor-hm}
+\end{figure}
+
+% Maps
+\begin{figure}
+    \includegraphics[width=\textwidth]{article-figures/maps/2019-03-26-rf-1m-bubble}
+    \caption{Random Forest single model prediction residuals per class, spatially}
+    \label{resid-rf-1m-uncor}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\textwidth]{article-figures/maps/2019-03-26-rf-3m-bubble}
+    \caption{Random Forest three-step model prediction residuals per class, spatially}
+    \label{resid-rf-3m-uncor}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\textwidth]{article-figures/maps/2019-04-10-rasterised-validation}
+    \caption{Validation data spatially}
+    \label{raster-validation}
+\end{figure}
+\begin{figure}
+    \includegraphics[width=\textwidth]{article-figures/maps/2019-04-10-rasterised-rf-1m-uncor}
+    \caption{Random Forest single model predictions spatially}
+    \label{raster-rf-1m-uncor}
+\end{figure}
 
 \section{Discussion}
 
