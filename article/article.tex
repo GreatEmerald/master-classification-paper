@@ -10,7 +10,7 @@
 \usepackage{indentfirst}
 \usepackage{booktabs} % For \toprule, etc.
 \usepackage[sort&compress,sectionbib]{natbib}
-\bibliographystyle{chicago}
+\bibliographystyle{newapa}
 
 % Custom packages
 \usepackage[acronym,toc,shortcuts,nohypertypes=acronym]{glossaries}
@@ -58,6 +58,11 @@
 \newacronym{MAE}{MAE}{Mean absolute error}
 \newacronym{ME}{ME}{Mean error}
 \newacronym{NSE}{NSE}{Nash–Sutcliffe model efficiency coefficient}
+\newacronym{SDG}{SDG}{Sustainable Development Goal}
+\newacronym{LC-CCI}{LC-CCI}{ESA Climate Change Initiative Land Cover}
+\newacronym{CGLS}{CGLS-LC100}{Copernicus Global Land Services Land Cover}
+\newacronym{FROM-GLC}{FROM-GLC10}{Finer Resolution Observation and Monitoring Global Land Cover}
+\newacronym{SMA}{SMA}{Spectral mixture analysis}
 \makenoidxglossaries
 
 % Use \begin{equation} for maths
@@ -103,11 +108,21 @@ The application of the method on data gathered throughout Africa shows the appli
  \item Global land cover maps
 \end{enumerate}
 
-Global land cover mapping is very important from an ecological and earth systems point of view. Land cover maps are used for a variety of applications, from estimating area covered by forests \citep{bartalev2014probavboreal} to air quality modelling \citep{wiedinmyer2006airquality}. In addition, land cover maps, especially those of fine spatial resolution, have the potential to be used for land cover change monitoring \citep{defourny2012cci}. This is important for a number of land cover classes. For instance, forests are an important terrestrial carbon sink in the global carbon cycle, with different forests having different carbon sink capacities \citep{pan2011large}. Knowing their distribution and changes over time allows for more accurate climate change modelling. Another land cover class, wetlands, is key for maintaining biodiversity due to the uniqueness of wetland ecosystems that allows rare and protected species to live there.
+Land cover, as one of the key variables for monitoring a number of \cglspl{SDG}, has received attention in recent years, and new global land cover maps have emerged to better map the current land cover of the world, as well as to track land cover change.
+The most recent achievements have been the \ac{LC-CCI} map \highlight[id=dm, comment=Is there a better citation?]{\citep{defourny2012cci}} that aims at maintaining a long medium-resolution time series of global land cover for the climate community, \highlight[id=dm, comment=ditto]{\ac{CGLS}} map that aims at a finer spatial resolution and high quality with yearly updates since 2015, and the \ac{FROM-GLC} map \citep{fromglc2019} that showcases the potential of land cover mapping at 10 m resolution.
 
-The creation of a global land cover map from remote sensing data has been a goal of many different studies \citep{hansen2000hardtree}. Their results are nowadays freely available as satellite imagery products, such as Global Land Cover 2000 \citep{bartholome2005glc2000}, MODIS land cover \citep{friedl2010modis} and GlobCover \citep{arino2007globcover}. There are also maps based on the fusion of multiple other maps, like Geo-Wiki hybrid \citep{see2015hybrid}, and multiple sensors, like Land Cover CCI \citep{lccciguide} and GlobeLand30 \citep{chen2015globeland30}. However, these land cover maps all have certain drawbacks.
+Most of these global land cover maps, as well as previous global land cover maps such as by \citet{bartholome2005glc2000, friedl2010modis, arino2007globcover, see2015hybrid, chen2015globeland30}, are provided as discrete classes (also known as ``hard'' or ``crisp'' classification), where each pixel of the map can only represent a single class.
+However, this results in less precise estimation of land cover due to mixed pixels, where in reality there are multiple land cover classes in the area covered by a single pixel.
+This issue becomes worse at coarse resolutions and heterogeneous landscapes.
+It may result in biases, for instance, a sparse forest may be classified as grassland, ignoring the relatively few trees in the area, and thus ultimately lead to an underestimation of tree cover at large scales.
 
-The first common drawback of current global land cover classification maps is that their spatial resolution is low to medium. The majority of aforementioned land cover maps are derived from MODIS and MERIS sensor data. These sensors are only capable of capturing images with the finest pixels representing 300 by 300 metre areas (at the equator). Recent advances in satellite sensors and computing power would allow for land cover classification at a higher spatial and temporal resolution. For example, at the moment the PROBA-V mission by the European Space Agency produces imagery with as fine as 100 by 100 metre pixels (with additional products also providing 300 by 300 metre and 1 by 1 kilometre pixel size for comparison with previous sensors) \citep{probavguide}. It is well-suited for time series analysis, because it has an archive that goes back to 2013, as well as a fast revisit time of 2 days for full global coverage (1 day for locations above 35\textdegree{} latitude) \citep{dierckx2014probav}.
+A potential solution to this issue is land cover fraction mapping, where instead of a discrete class, the proportion of every class in the legend is reported for every pixel of the map.
+This is also called ``fuzzy'' or ``soft'' classification.
+Land cover fraction mapping has been attempted in the past, both in research \citep{adams_classification_1995, foody1996fuzzyevaluation, colditz_land_2011, sharma_assessing_2011, uma_shankar_wavelet-fuzzy_2011, dwivedi_optimisation_2012, lizarazo_quantitative_2012, gessner_estimating_2013, okujeni_generalizing_2018} and production (e.g. \citealp{hansen2000hardtree, hansen_continuous_2011, pengra_global_2015, hansen_global_2003, sexton_global_2013}).
+Nevertheless, to date there is \highlight[id=dm, comment=Depends on how we position CGLOPS]{no global map} that would provide fractions of every major land cover class in a single product.
+
+Land cover fraction mapping can be performed using different approaches and algorithms.
+In its core, it is a regression rather than a classification problem, as the output is a fraction of a label rather than a label itself. Popular approaches include \ac{SMA} (e.g. \citealp{yang_landsat_2012, hobbs2003linear, shimabukuro1991least}), random forest regression
 
 The second drawback of current global land cover products is that their classification accuracy tends to be low, averaging at around 65\% \citep{tsendbazar2016integrating}. The third drawback is that all of these products use what is known as ``hard'' or ``crisp'' classification: each pixel is assigned to one particular land cover class only. The result of a hard classification is a thematic map. This classification type treats each pixel as homogeneous with regards to land cover, which is rarely the case in reality. In contrast, a ``fuzzy'' or ``soft'' classification, sometimes also called ``subpixel'' classification or ``linear mixture modelling'' \citep{Okeke2006fuzzyexponent} identifies the proportion of each land cover class within each pixel. The result of a fuzzy classification is one map per land cover class, showing the proportion of the pixel area covered by the land cover class.
 
