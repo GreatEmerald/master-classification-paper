@@ -1,0 +1,8 @@
+digraph {
+    node[shape="parallelogram"]
+        "GLSDEM elevation"
+        Terrain [label="Terrain parameters\nSlope, aspect, TPI"]
+    node[shape="Mrecord"]
+    
+    "GLSDEM elevation" -> "Calculation" -> Terrain
+}

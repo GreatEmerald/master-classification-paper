@@ -1,0 +1,47 @@
+digraph {
+    // Define data node shapes
+    node[shape="parallelogram"]
+        Harmonics [label="Sines, cosines, phase, amplitude, trend"]
+        Descriptives [label="Mean, IQR"]
+        Composites [label="Mean VIs over summer period"]
+    node[shape="parallelogram", peripheries=3]
+        "PV" [label="Proba-V 100m L3 TOC S5"]
+        //RawBands [label="Blue, Red, NIR, SWIR"]
+        /*"NDVI"
+        "Blue"
+        "Red"
+        "NIR"
+        "SWIR" */
+        //"SM" [label="Quality flags"]
+        /*"NDMI"
+        "EVI"
+        "NIRv"*/
+        Bands [label="Cloud-free time series\nBlue, Red, NIR, SWIR, NDVI"]
+        VIs [label=<NDMI, EVI, OSAVI, NIR<SUB>v</SUB>>]
+    // Reset shape
+    node[shape="Mrecord"]
+        "TS" [label="Temporal cloud filter"]
+    
+    /*"PV" -> "SM"
+    {"PV", "SM"} -> "Mask clouds"*/
+    PV -> "Mask clouds"
+    /*"Mask clouds" -> "Blue"
+    {"Mask clouds", "Blue"} -> "TS"
+    "TS" -> "NDVI"
+    "TS" -> "Blue"
+    "TS" -> "Red"
+    "TS" -> "NIR"
+    "TS" -> "SWIR"
+    {"NIR", "SWIR"} -> "NDMI"
+    {"Blue", "Red", "NIR"} -> "EVI"
+    {"NDVI", "NIR"} -> "NIRv"
+    
+    {"Red", "Blue", "NIR", "SWIR", "NDVI", "NDMI", "EVI", "NIRv"} -> "Descriptive statistics"
+    {"Red", "Blue", "NIR", "SWIR", "NDVI", "NDMI", "EVI", "NIRv"} -> "Harmonic analysis" */
+    
+    "Mask clouds" -> "TS" -> Bands
+    Bands -> VIs [label="Calculate"]
+    Bands -> "Harmonic analysis" -> Harmonics
+    Bands -> "Descriptive statistics" -> Descriptives
+    {Bands, VIs} -> "Compositing" -> Composites
+}

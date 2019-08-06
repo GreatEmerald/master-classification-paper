@@ -1,0 +1,10 @@
+digraph {
+    //node[shape="parallelogram"]
+    //    ExtraCovars [label="Min, max, mean of srad, wind, vapr"]
+    node[shape="parallelogram", peripheries=3]
+        SoilGrids [label="SoilGrids covariates at 6-7 depths"]
+        LandGIS [label="LandGIS covariates at 6 depths"]
+    node[shape="Mrecord"]
+    
+    {SoilGrids, LandGIS} -> "Filter to 10 cm depth"
+}

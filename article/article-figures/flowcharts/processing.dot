@@ -1,0 +1,18 @@
+digraph {
+    node[shape="parallelogram"]
+        Training [label="Training data"]
+        Validation [label="Validation data"]
+    node[shape="parallelogram", peripheries=3]
+        "Optical data"
+        "Terrain data"
+        "Climate data"
+        "Soil data"
+        Covars [label="Uncorrelated covariates"]
+        Fractions [label="Land cover fractions"]
+    node[shape="Mrecord"]
+    
+    {"Optical data", "Climate data", "Terrain data", "Soil data"} -> "Variable selection" -> Covars
+    {Covars, Training} -> "Model training"
+    {Covars, "Model training"} -> "Model prediction" -> Fractions
+    {Validation, Fractions} -> "Model validation"
+}

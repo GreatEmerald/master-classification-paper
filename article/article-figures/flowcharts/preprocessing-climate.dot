@@ -1,0 +1,9 @@
+digraph {
+    node[shape="parallelogram"]
+        ExtraCovars [label="Min, max, mean of srad, wind, vapr"]
+    node[shape="parallelogram", peripheries=3]
+        WorldClim [label="WorldClim 2.0 covariates"]
+    node[shape="Mrecord"]
+    
+    WorldClim -> "Descriptive statistics" -> ExtraCovars
+}
