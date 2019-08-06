@@ -3,7 +3,7 @@ digraph {
     node[shape="parallelogram"]
         Harmonics [label="Sines, cosines, phase, amplitude, trend"]
         Descriptives [label="Mean, IQR"]
-        Composites [label="Mean VIs over summer period"]
+        Composites [label="Mean VIs over leaf-on period"]
     node[shape="parallelogram", peripheries=3]
         "PV" [label="Proba-V 100m L3 TOC S5"]
         //RawBands [label="Blue, Red, NIR, SWIR"]
