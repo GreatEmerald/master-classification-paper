@@ -995,7 +995,6 @@
 	author = {Sharma, Chandra S. and Behera, Mukund D. and Mishra, Atmaram and Panda, Sudhindra N.},
 	month = oct,
 	year = {2011},
-	keywords = {fractional land cover mapping, fuzzy land cover updating, India},
 	pages = {3219},
 	file = {Full Text PDF:/home/dainius/Zotero/storage/EARU7E54/Sharma et al. - 2011 - Assessing Flood Induced Land-Cover Changes Using R.pdf:application/pdf}
 }
@@ -1015,15 +1014,7 @@
 	author = {Uma Shankar, B. and Meher, Saroj K. and Ghosh, Ashish},
 	month = apr,
 	year = {2011},
-	keywords = {read, Remote sensing, relevant, Markov random fields, fractional land cover mapping, Fuzzy classification, Land cover classification, Soft computing, Wavelet features, Wavelet transform, fuzzy K-nearest neighbor algorithm, fuzzy rule-based system},
 	pages = {2999--3011},
-	annote = {Includes a list of algorithms that were proposed in the past, many of them I haven't heard (hierarchical, fuzzification-MIN-defuzzification rule-based, rule-based, aggregation)
-Criticises k-NN, neural networks, ML for not taking spatial and temporal context into account, suggests Markov Random Fields for classification.
-Tested wavelet transform to get spatiotemporal multispectral features, then fed it to models: fuzzy k-NN, fuzzy ML, fuzzy explicit and fuzzy product aggregation reasoning rule (FPARR).
-Suggests first analysing coarse pixels, then finer ones, in order to take context into account. That's how wavelet transform works: you decompose components into sort of edge-detects of horizontal, vertical and diagonal, and you build up pyramid layers. Then that data can be fed into a classifier, and it contains information about the spatial context too.
-Fuzzy k-NN is basically fuzzy c-means, except that it takes k neighbours' centroids rather than the centroid of the whole set. It will be the same if k=N. (Actually, supervised fuzzy c-means is in fact a fuzzy nearest centroid classifier.)
-Wavelet transform helps with separation of classes, and the resulting hard imagery is also very slightly better. They didn't look into a confusion matrix, though, and the classes were a bit arbitrary (probably from clustering).
-Fuzzy k-NN and fuzzy ML were the worst, fuzzy explicit (similar to FuzzyNPC) was better, and FRBS was the best, with or without wavelet data.},
 	file = {ScienceDirect Full Text PDF:/home/dainius/Zotero/storage/HTJUT2PY/Uma Shankar et al. - 2011 - Wavelet-fuzzy hybridization Feature-extraction an.pdf:application/pdf}
 }
 
@@ -1034,7 +1025,6 @@ Fuzzy k-NN and fuzzy ML were the worst, fuzzy explicit (similar to FuzzyNPC) was
 	journal = {Int. Arch. Photogramm. Remote Sens. Spatial Inf. Sci.},
 	author = {Dwivedi, Rakesh and Kumar, Anil and Ghosh, S. and Roy, P.},
 	year = {2012},
-	keywords = {unread, relevant, fractional land cover mapping, sub-pixel confusion-uncertainty matrix},
 	pages = {385--390},
 	file = {isprsarchives-XXXIX-B3-385-2012.pdf:/home/dainius/Zotero/storage/NQS8SCCT/isprsarchives-XXXIX-B3-385-2012.pdf:application/pdf}
 }
@@ -1090,9 +1080,6 @@ Fuzzy k-NN and fuzzy ML were the worst, fuzzy explicit (similar to FuzzyNPC) was
 	year = {2015},
 	keywords = {skimmed, Landsat, relevant, Global land cover, Accuracy assessment, Continuous field data, High resolution satellite, Tree cover, Validation database},
 	pages = {234--248},
-	annote = {How to validate fuzzy maps: idea to make a confusion matrix based on overlap between the two sample points per class. Compared with hardening using a 30\% threshold, results are similar. Then you get user/producer accuracies etc. but the numbers are in percent rather than the number of pixels.
-Also noted the issue of zero/100\% inflation. Scatterplots are useless and the statistics can get quite skewed, the distributions are inverted normal.
-Also checked in bins of the histogram whether there was a bias in over/underestimation, and there was some. But the 100\%/0\% bins were predicted pretty well.},
 	file = {ScienceDirect Full Text PDF:/home/dainius/Zotero/storage/E5X3JBGC/Pengra et al. - 2015 - A global reference database from very high resolut.pdf:application/pdf}
 }
 
@@ -1208,4 +1195,172 @@ Also checked in bins of the histogram whether there was a bias in over/underesti
 	pages = {529--544},
 	annote = {Using fuzzy rules for land cover, but in the end they compare hard maps anyway.},
 	file = {ScienceDirect Full Text PDF:/home/dainius/Zotero/storage/G9RGD346/Stavrakoudis et al. - 2011 - A Boosted Genetic Fuzzy Classifier for land cover .pdf:application/pdf}
+}
+
+
+@article{hengl_soilgrids250m_2017,
+	title = {{SoilGrids}250m: {Global} gridded soil information based on machine learning},
+	volume = {12},
+	issn = {1932-6203},
+	shorttitle = {{SoilGrids}250m},
+	url = {http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0169748},
+	doi = {10.1371/journal.pone.0169748},
+	abstract = {This paper describes the technical development and accuracy assessment of the most recent and improved version of the SoilGrids system at 250m resolution (June 2016 update). SoilGrids provides global predictions for standard numeric soil properties (organic carbon, bulk density, Cation Exchange Capacity (CEC), pH, soil texture fractions and coarse fragments) at seven standard depths (0, 5, 15, 30, 60, 100 and 200 cm), in addition to predictions of depth to bedrock and distribution of soil classes based on the World Reference Base (WRB) and USDA classification systems (ca. 280 raster layers in total). Predictions were based on ca. 150,000 soil profiles used for training and a stack of 158 remote sensing-based soil covariates (primarily derived from MODIS land products, SRTM DEM derivatives, climatic images and global landform and lithology maps), which were used to fit an ensemble of machine learning methods—random forest and gradient boosting and/or multinomial logistic regression—as implemented in the R packages ranger, xgboost, nnet and caret. The results of 10–fold cross-validation show that the ensemble models explain between 56\% (coarse fragments) and 83\% (pH) of variation with an overall average of 61\%. Improvements in the relative accuracy considering the amount of variation explained, in comparison to the previous version of SoilGrids at 1 km spatial resolution, range from 60 to 230\%. Improvements can be attributed to: (1) the use of machine learning instead of linear regression, (2) to considerable investments in preparing finer resolution covariate layers and (3) to insertion of additional soil profiles. Further development of SoilGrids could include refinement of methods to incorporate input uncertainties and derivation of posterior probability distributions (per pixel), and further automation of spatial modeling so that soil maps can be generated for potentially hundreds of soil variables. Another area of future research is the development of methods for multiscale merging of SoilGrids predictions with local and/or national gridded soil products (e.g. up to 50 m spatial resolution) so that increasingly more accurate, complete and consistent global soil information can be produced. SoilGrids are available under the Open Data Base License.},
+	language = {en},
+	number = {2},
+	urldate = {2018-08-22},
+	journal = {PLOS ONE},
+	author = {Hengl, Tomislav and Jesus, Jorge Mendes de and Heuvelink, Gerard B. M. and Gonzalez, Maria Ruiperez and Kilibarda, Milan and Blagotić, Aleksandar and Shangguan, Wei and Wright, Marvin N. and Geng, Xiaoyuan and Bauer-Marschallinger, Bernhard and Guevara, Mario Antonio and Vargas, Rodrigo and MacMillan, Robert A. and Batjes, Niels H. and Leenaars, Johan G. B. and Ribeiro, Eloi and Wheeler, Ichsani and Mantel, Stephan and Kempen, Bas},
+	month = feb,
+	year = {2017},
+	keywords = {read, Time series analysis, soil organic matter, skimmed, Remote sensing, Random forest, relevant, Machine learning, Trees, paramount, Agricultural soil science, Forecasting, Glaciers, Shannon index, Soil ecology, SoilGrids, extreme gradient boosting, multinomial logistic regression, Equi7, Shannon Entropy Index},
+	pages = {e0169748}
+}
+
+
+@book{hengl_predictive_2019,
+	title = {Predictive {Soil} {Mapping} with {R}},
+	isbn = {978-0-359-30635-0},
+	abstract = {Predictive Soil Mapping (PSM) is based on applying statistical and/or machine learning techniques to fit models for the purpose of producing spatial and/or spatiotemporal predictions of soil variables i.e. maps of soil properties and classes at different resolutions. It is a multidisciplinary field combining statistics, data science, soil science, physical geography, remote sensing, geoinformation science and a number of other sciences. Predictive Soil Mapping with R is about understanding the main concepts behind soil mapping, mastering R packages that can be used to produce high quality soil maps, and about optimizing all processes involved so that also the production costs can be reduced. The online version of the book is available at: https: //envirometrix.github.io/PredictiveSoilMapping/ Pull requests and general comments are welcome. These materials are based on technical tutorials initially developed by the ISRIC's Global Soil Information Facilities (GSIF) development team over the period 2014?2017},
+	language = {en},
+	publisher = {Lulu.com},
+	author = {Hengl, Tomislav and MacMillan, Robert A.},
+	month = feb,
+	year = {2019},
+	keywords = {Technology \& Engineering / Engineering (General)}
+}
+
+@article{wan_mod11a2_2015,
+	title = {{MOD}11A2 {MODIS}/{Terra} {Land} {Surface} {Temperature}/{Emissivity} 8-{Day} {L}3 {Global} 1km {SIN} {Grid} {V}006},
+	url = {https://lpdaac.usgs.gov/products/mod11a2v006/},
+	doi = {10.5067/modis/mod11a2.006},
+	urldate = {2019-08-07},
+	author = {Wan, Z. and Hook, S. and Hulley, G.},
+	year = {2015},
+	note = {type: dataset}
+}
+
+@Manual{r_2019,
+    title = {R: A Language and Environment for Statistical Computing},
+    author = {{R Core Team}},
+    organization = {R Foundation for Statistical Computing},
+    address = {Vienna, Austria},
+    year = {2019},
+    url = {https://www.R-project.org/},
+  }
+
+@Manual{keras,
+    title = {keras: R Interface to 'Keras'},
+    author = {JJ Allaire and François Chollet},
+    year = {2018},
+    note = {R package version 2.2.4},
+    url = {https://CRAN.R-project.org/package=keras},
+  }
+
+@Book{nnet,
+    title = {Modern Applied Statistics with S},
+    author = {W. N. Venables and B. D. Ripley},
+    publisher = {Springer},
+    edition = {Fourth},
+    address = {New York},
+    year = {2002},
+    note = {ISBN 0-387-95457-0},
+    url = {http://www.stats.ox.ac.uk/pub/MASS4},
+  }
+  
+@Article{glmnet,
+  title = {Regularization Paths for Generalized Linear Models via Coordinate Descent},
+  author = {Jerome Friedman and Trevor Hastie and Robert Tibshirani},
+  journal = {Journal of Statistical Software},
+  year = {2010},
+  volume = {33},
+  number = {1},
+  pages = {1--22},
+  url = {http://www.jstatsoft.org/v33/i01/},
+}
+
+@Manual{pls,
+  title = {pls: Partial Least Squares and Principal Component Regression},
+  author = {Bjørn-Helge Mevik and Ron Wehrens and Kristian Hovde Liland},
+  year = {2016},
+  note = {R package version 2.6-0},
+  url = {https://CRAN.R-project.org/package=pls},
+}
+
+
+@book{martens_multivariate_1992,
+	title = {Multivariate {Calibration}},
+	isbn = {978-0-471-93047-1},
+	abstract = {Multivariate Calibration Harald Martens, Chemist, Norwegian Food Research Institute, Aas, Norway and Norwegian Computing Center, Oslo, Norway Tormod Næs, Statistician, Norwegian Food Research Institute, Aas, Norway The aim of this inter-disciplinary book is to present an up-to-date view of multivariate calibration of analytical instruments, for use in research, development and routine laboratory and process operation. The book is intended to show practitioners in chemistry and technology how to extract the quantitative and understandable information embedded in non-selective, overwhelming and apparently useless measurements by multivariate data analysis. Multivariate calibration is the process of learning how to combine data from several channels, in order to overcome selectivity problems, gain new insight and allow automatic outlier detection. Multivariate calibration is the basis for the present success of high-speed Near-Infrared (NIR) diffuse spectroscopy of intact samples. But the technique is very general: it has shown similar advantages in, for instance, UV, Vis, and IR spectrophotometry, (transmittance, reflectance and fluorescence), for x-ray diffraction, NMR, MS, thermal analysis, chromatography (GC, HPLC) and for electrophoresis and image analysis (tomography, microscopy), as well as other techniques. The book is written at two levels: the main level is structured as a tutorial on the practical use of multivariate calibration techniques. It is intended for university courses and self-study for chemists and technologists, giving one complete and versatile approach, based mainly on data compression methodology in self-modelling PLS regression, with considerations of experimental design, data pre-processing and model validation. A second, more methodological, level is intended for statisticians and specialists in chemometrics. It compares several alternative calibration methods, validation approaches and ways to optimize the models. The book also outlines some cognitive changes needed in analytical chemistry, and suggests ways to overcome some communication problems between statistics and chemistry and technology.},
+	language = {en},
+	publisher = {John Wiley \& Sons},
+	author = {Martens, Harald and Næs, Tormod},
+	month = aug,
+	year = {1992},
+	note = {Google-Books-ID: 6lVcUeVDg9IC},
+	keywords = {Science / Chemistry / Analytic, Science / Chemistry / General}
+}
+
+@Article{ranger,
+    title = {{ranger}: A Fast Implementation of Random Forests for High Dimensional Data in {C++} and {R}},
+    author = {Marvin N. Wright and Andreas Ziegler},
+    journal = {Journal of Statistical Software},
+    year = {2017},
+    volume = {77},
+    number = {1},
+    pages = {1--17},
+    doi = {10.18637/jss.v077.i01},
+  }
+
+
+@article{silvan-cardenas_sub-pixel_2008,
+	title = {Sub-pixel confusion–uncertainty matrix for assessing soft classifications},
+	volume = {112},
+	issn = {0034-4257},
+	url = {http://www.sciencedirect.com/science/article/pii/S0034425707003434},
+	doi = {10.1016/j.rse.2007.07.017},
+	abstract = {The prevailing concerns on ecological and environmental issues, occurring especially at regional to global scales, have prompted significant advances on the use of remote sensing data for the estimation of land cover information at sub-pixel level. However, the quality of such classification products, as well as the performance of the classification protocol employed, are difficult to quantify. This paper had the objectives of 1) reviewing the existing alternatives, while identifying major drawbacks and desirable properties, for sub-pixel accuracy assessment based on cross-comparison matrices, and 2) developing theoretical grounds, for a more general accuracy assessment of soft classifications, that account for the sub-pixel class distribution uncertainty. It was found that, for a sub-pixel confusion matrix to exhibit a diagonalization characteristic that allows identifying a perfect matching case, the agreement measure must be constrained at pixel level, whereas a disagreement measure can take into account the sub-pixel distribution uncertainty, leading to an underspecified problem termed the sub-pixel area allocation problem. It was demonstrated that the sub-pixel area allocation problem admits a unique solution if, and only if, no more than one class is either over- or underestimated at each pixel. In this case, the sub-pixel confusion can be uniquely determined. When no unique solution exists, the space of feasible solutions can be represented by confusion intervals. A new cross-comparison matrix that reports the confusion intervals in the form of a center value plus–minus maximum error was proposed to account for the sub-pixel distribution uncertainty. The new matrix is referred to as sub-pixel confusion–uncertainty matrix (SCM). Sub-pixel accuracy measures were also derived from this matrix. The practical use of the SCM and derived indices was demonstrated in assessing an invasive species detection method and a fuzzy classification of urban land use/land cover through remote sensing procedures.},
+	number = {3},
+	urldate = {2018-07-23},
+	journal = {Remote Sensing of Environment},
+	author = {Silván-Cárdenas, J. L. and Wang, L.},
+	month = mar,
+	year = {2008}
+}
+
+@article{tsendbazar_developing_2018,
+	title = {Developing and applying a multi-purpose land cover validation dataset for {Africa}},
+	volume = {219},
+	issn = {0034-4257},
+	url = {http://www.sciencedirect.com/science/article/pii/S0034425718304796},
+	doi = {10.1016/j.rse.2018.10.025},
+	abstract = {The production of global land cover products has accelerated significantly over the past decade thanks to the availability of higher spatial and temporal resolution satellite data and increased computation capabilities. The quality of these products should be assessed according to internationally promoted requirements e.g., by the Committee on Earth Observation Systems-Working Group on Calibration and Validation (CEOS-WGCV) and updated accuracy should be provided with new releases (Stage-4 validation). Providing updated accuracies for the yearly maps would require considerable effort for collecting validation datasets. To save time and effort on data collection, validation datasets should be designed to suit multiple map assessments and should be easily adjustable for a timely validation of new releases of land cover products. This study introduces a validation dataset aimed to facilitate multi-purpose assessments and its applicability is demonstrated in three different assessments focusing on validating discrete and fractional land cover maps, map comparison and user-oriented map assessments. The validation dataset is generated primarily to validate the newly released 100 m spatial resolution land cover product from the Copernicus Global Land Service (CGLS-LC100). The validation dataset includes 3617 sample sites in Africa based on stratified sampling. Each site corresponds to an area of 100 m × 100 m. Within site, reference land cover information was collected at 100 subpixels of 10 m × 10 m allowing the land cover information to be suitable for different resolution and legends. Firstly, using this dataset, we validated both the discrete and fractional land cover layers of the CGLS-LC100 product. The CGLS-LC100 discrete map was found to have an overall accuracy of 74.6 ± 2.1\% (at 95\% confidence level) for the African continent. Fraction cover products were found to have mean absolute errors of 9.3, 8.8, 16.2, and 6.5\% for trees, shrubs, herbaceous vegetation and bare ground, respectively. Secondly, for user-oriented map assessment, we assessed the accuracy of the CGLS-LC100 map from four user groups' perspectives (forest monitoring, crop monitoring, biodiversity and climate modelling). Overall accuracies for these perspectives vary between 73.7\% ± 2.1\% and 93.5\% ± 0.9\%, depending on the land cover classes of interest. Thirdly, for map comparison, we assessed the accuracy of the Globeland30-2010 map at 30 m spatial resolution. Using the subpixel level validation data, we derived 15,252 sample pixels at 30 m spatial resolution. Based on these sample pixels, the overall accuracy of the Globeland30-2010 map was found to be 66.6 ± 2.4\% for Africa. The three assessments exemplify the applicability of multi-purpose validation datasets which are recommended to increase map validation efficiency and consistency. Assessments of subsequent yearly maps can be conducted by augmenting or updating the dataset with sample sites in identified change areas.},
+	urldate = {2018-10-31},
+	journal = {Remote Sensing of Environment},
+	author = {Tsendbazar, N-E. and Herold, M. and de Bruin, S. and Lesiv, M. and Fritz, S. and Van De Kerchove, R. and Buchhorn, M. and Duerauer, M. and Szantoi, Z. and Pekel, J. -F.},
+	month = dec,
+	year = {2018},
+	pages = {298--309}
+}
+
+@manual{ASTGTM003,
+    author={{NASA/METI/AIST/Japan Spacesystems}, and {U.S./Japan ASTER Science Team}},
+    year={2019},
+    title={ASTER Global Digital Elevation Model V003},
+    publisher={NASA EOSDIS Land Processes DAAC},
+    misc={Accessed 2020-04-15 from https://doi.org/10.5067/ASTER/ASTGTM.003}
+}
+
+@article{worldclim2,
+author = {Fick, Stephen E. and Hijmans, Robert J.},
+title = {WorldClim 2: new 1-km spatial resolution climate surfaces for global land areas},
+journal = {International Journal of Climatology},
+volume = {37},
+number = {12},
+pages = {4302-4315},
+keywords = {interpolation, climate surfaces, WorldClim, MODIS, land surface temperature, cloud cover, solar radiation, wind speed, vapour pressure},
+doi = {10.1002/joc.5086},
+url = {https://rmets.onlinelibrary.wiley.com/doi/abs/10.1002/joc.5086},
+eprint = {https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1002/joc.5086},
+year = {2017}
 }
