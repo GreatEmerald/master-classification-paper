@@ -82,6 +82,7 @@
 \newacronym{RF}{RF}{random forest}
 \newacronym{TOC}{TOC}{Top-of-Canopy}
 \newacronym{CART}{CART}{Classification and regression tree}
+\newacronym{GLM}{GLM}{General linear regression model}
 \makenoidxglossaries
 % Disable abbreviating RF for now [text={random forest}]
 %\glsunset{RF}
@@ -285,6 +286,7 @@ The latitude, longitude and absolute latitude of the points were also included a
 Lastly, as part of the SoilGrids dataset, the MODIS land surface temperature product (MOD11A2, \citealp{wan_mod11a2_2015}) data monthly composites for 2011 were also used as additional covariates.
 
 \subsection{Covariate selection}
+\label{sec-covariate-selection}
 
 In total, 313 covariates were used for predicting the land cover fractions.
 However, many of them are colinear with one another, and thus variable selection was used to remove colinear covariates.
@@ -414,26 +416,47 @@ The numbers obtained are averages and standard deviations of the aforementioned 
 \section{Results}
 
 \begin{enumerate}
- \item RMSE per class comparison: no big differences
- \item Subpixel confusion matrix metrics: quite a big difference
- \item RF variable importance
- \item Truth:prediction scatterplots (hex/box/bar)
- \item Point map of Africa for the different classes
+ \item Differences between all models, showing the RF has lowest RMSE
+ \item Variable importance for RF; stressing importance of RS data by a model with only RS variables
+ \item Spatial wall-to-wall demo map and spatial errors
 \end{enumerate}
 
 \subsection{Method accuracy comparison}
 
-Overall model accuracy statistics are reported in table \ref{tab-accuracy}.
+Overall model accuracy statistics are reported in table \ref{tab-accuracy}, and per-class statistics in figure \ref{fig-models}.
 \Gls{RF} regression with no adjustments (single model) obtained the lowest \gls{RMSE}, but lowest \gls{MAE} was obtained with \gls{RF} regression using the three-step model and median voting.
 \gls{NSE} results follow the \gls{RMSE} results, and the \gls{OA} from the subpixel confusion-uncertainty matrix follow the \gls{MAE} results.
 
-The models that performed the best (\gls{RF} and Cubist) are related models based on \gls{CART} ensembles.
-Predictions per class were made using the binary relevance method, as the models predict a single outcome unlike the \gls{NN} and \gls{MLR} models.
-This shows that despite the model training procedure involving less data for each class trained and the rescaling to 100\% requirement, the advantages of these models outweigh the disadvantages of the binary relevance method.
-% * <Dainius Masiliūnas> 18:32:47 15 Apr 2020 UTC+0200:
-% Discussion point: is a multiple Y RF possible?
+\begin{figure}
+    \includegraphics[width=\textwidth]{article-figures/boxplots/2020-05-08-model-comparison-bar}
+    \caption{Comparison of the distribution of absolute errors between different models tested, ordered by decreasing overall \gls{MAE}. Dotted lines indicate \gls{MAE}, box indicates median and 75th/25th percentiles.}
+    \label{fig-models}
+\end{figure}
 
-All tested models had difficulty discerning the vegetation classes (crops, grassland, shrub, tree) between each other, and less so with the non-vegetated land cover (water, bare soil, urban).
+The models that performed the best (\gls{RF} and Cubist) are related models based on \gls{CART} ensembles.
+Predictions per class were made using the binary relevance method (one model per class), as these models are univariate.
+This shows that despite the binary relevance limitations of each model only being aware of its relevant class and not the others, and requiring a rescale step to make sure the fractions sum up to 100\%, the advantages of these machine learning models outweigh the disadvantages of the binary relevance method.
+
+Multivariate linear statistical models (\gls{GLM}, \gls{PLS}, Lasso regression and \gls{MLR}) performed significantly worse, as they are limited to a linear approach.
+The results of all of the linear models were very similar, which shows that there was no added value in \gls{PLS} and Lasso extensions over the basic \gls{GLM}.
+This may be due to the additional preprocessing step of covariate selection as detailed in section \ref{sec-covariate-selection}.
+It resulted in all remaining covariates being important enough to the prediction of land cover fractions, so that removing any more of them hurts rather than improves model performance.
+
+\Gls{FNC} was the model that performed the worst out of the non-trivial models tested.
+This indicates that the shape of the covariate data in feature space is too complex to capture merely with a centroid approach.
+This is further evidenced by a much better result obtained by the binary relevance \gls{SVM} model, which works on a similar principle but can capture more complex shapes.
+
+\Gls{MLP} \glspl{NN}, despite being a multivariate machine learning model, performed worse than all of the tested binary relevance methods, but better than all of the multivariate linear models.
+
+There was a trade-off between optimisation for \gls{MAE} and \gls{RMSE}, i.e. between penalising for large misclassifications or not.
+Models that had lower \gls{MAE} were more crisp, whereas models with lower \gls{RMSE} were more fuzzy.
+Models that achieved lowest \gls{MAE}, in cases of high uncertainty tended to predict 100\% fractions more often, but risk misclassification, whereas models with lowest \gls{RMSE} would predict a mix of all classes that could be within the pixel, thus more often being partially but not completely wrong.
+
+All tested models had difficulty discerning the vegetation classes (grassland, trees, crops, shrubs) between each other, and less so with the non-vegetated land cover (water, urban, bare soil).
+This was exacerbated by the imbalance in class distribution: the urban class is simple to predict well due to the fact that it is rare and very rarely forms a majority, therefore a guess of 0\% is usually a good one.
+In contrast, the tree fraction has a lot of samples with 100\% fraction and it deviates a lot per each sample, making it a highly unpredictable class from the data alone.
+Most models showed good improvement in predicting tree cover compared to the intercept model, indicating that the covariates used were useful in telling trees apart from other classes.
+In contrast, there were only moderate improvements for predicting the grass fraction, as it is difficult for the classifiers to distinguish this class with the given input covariates.
 
 \begin{table}
 \centering
@@ -445,18 +468,20 @@ All tested models had difficulty discerning the vegetation classes (crops, grass
 \midrule
 Intercept
 & 29.9  & 21.4  & 0     & 26±5  & 0.13±0.07 \\
-\Gls{PLS} regression
-& 27.2  & 17.8  & 0.17  & 38±4  & 0.21±0.06 \\
 \Gls{FNC}
-& 24.1  & 13.7  & 0.35  & 52±4  & 0.41±0.06 \\
+& 24.4  & 13.5  & 0.33  & 53±4  & 0.42±0.06 \\
+General linear model and \Gls{PLS}
+& 21.6  & 12.7  & 0.48  & 56±4  & 0.43±0.05 \\
 Lasso regression
-& 22.1  & 13.3  & 0.45  & 54±4  & 0.40±0.05 \\
+& 21.4  & 12.6  & 0.49  & 56±4  & 0.43±0.05 \\
 \Gls{MLR}
 & 21.6  & 12.1  & 0.48  & 58±4  & 0.46±0.06 \\
+Multivariate RF
+& 18.7  & 10.0  & 0.61  & 65±3  & 0.55±0.05 \\
 \Glspl{NN}
 % * <Dainius Masiliūnas> 18:06:02 15 Apr 2020 UTC+0200:
 % Double-check NN results - were they updated?
-& 23.8  & 10.0  & 0.37  & 65±2  & 0.54±0.02 \\
+& 22.7  & 9.2   & 0.43  & 68±1  & 0.57±0.02 \\
 \Gls{SVM} regression
 & 20.7  & 8.9   & 0.52  & 69±2  & 0.58±0.03 \\
 Cubist regression
@@ -483,33 +508,6 @@ Cubist regression
 \label{tab-accuracy}
 \end{table}
 
-% Barplots
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-19-rf-1m-uncor-bar}
-    \caption{Random Forest single model prediction accuracies per class, per predicted magnitude (extremes vs middle)}
-    \label{bar-rf-1m-uncor}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-19-rf-2m-uncor-bar}
-    \caption{Random Forest two-step model prediction accuracies per class, per predicted magnitude (extremes vs middle)}
-    \label{bar-rf-2m-uncor}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-19-rf-3m-uncor-bar}
-    \caption{Random Forest three-step model prediction accuracies per class, per predicted magnitude (extremes vs middle)}
-    \label{bar-rf-3m-uncor}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-22-rf-1m-uncor-hm-bar}
-    \caption{Random Forest single model prediction (histogram matched) accuracies per class, per predicted magnitude (extremes vs middle)}
-    \label{bar-rf-1m-uncor-hm}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/barplots/2019-03-22-rf-3m-uncor-hm-bar}
-    \caption{Random Forest three-step model prediction (histogram matched) accuracies per class, per predicted magnitude (extremes vs middle)}
-    \label{bar-rf-3m-uncor-hm}
-\end{figure}
-
 % Maps
 \begin{figure}
     \includegraphics[width=\textwidth]{article-figures/maps/2019-03-26-rf-1m-bubble}
@@ -533,83 +531,6 @@ Cubist regression
 \end{figure}
 
 \subsection{Adjustment for zero inflation}
-
-% 1:1 plots
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-points-a001s2}
-    \caption{Random Forest single model prediction correspondence to ground truth (raw points with overplotting).}
-    \label{raw-rf-1m-uncor}
-\end{figure}
-% Binplots
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-point-n100s20}
-    \caption{Random Forest single model prediction correspondence to ground truth, 100x100 bins.}
-    \label{bin-rf-1m-uncor-n100}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-point-n50s20sqrt}
-    \caption{Random Forest single model prediction correspondence to ground truth, 50x50 bins, square root transformation.}
-    \label{bin-rf-1m-uncor-n50sqrt}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-point-n50s10sqrt}
-    \caption{Random Forest single model prediction correspondence to ground truth, 50x50 bins, square root transformation, smaller circle sizes.}
-    \label{bin-rf-1m-uncor-n50sqrts10}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/binplots/2019-04-12-rf-1m-uncor-raster-n50sqrt}
-    \caption{Random Forest single model prediction correspondence to ground truth, square root transformation.}
-    \label{bin-rf-1m-uncor-rastersqrt}
-\end{figure}
-
-% Hexplots
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-1m-uncor-hex}
-    \caption{Random Forest single model prediction correspondence to ground truth.}
-    \label{hex-rf-1m-uncor}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hex}
-    \caption{Random Forest three-step model prediction correspondence to ground truth.}
-    \label{hex-rf-3m-uncor}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-1m-uncor-hm-hex}
-    \caption{Random Forest single model prediction (histogram matched) correspondence to ground truth.}
-    \label{hex-rf-1m-uncor-hm}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hm-hex}
-    \caption{Random Forest three-step model prediction (histogram matched) correspondence to ground truth.}
-    \label{hex-rf-3m-uncor-hm}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hma-hex}
-    \caption{Random Forest three-step model prediction (histogram matched middle, proportionally) correspondence to ground truth.}
-    \label{hex-rf-3m-uncor-hma}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/hexplots/2019-03-22-rf-3m-uncor-hmb-hex}
-    \caption{Random Forest three-step model prediction (histogram matched non-extremes) correspondence to ground truth.}
-    \label{hex-rf-3m-uncor-hmb}
-\end{figure}
-
-% Boxplots
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/boxplots/2019-03-19-rf-1m-uncor-box}
-    \caption{Random Forest single model prediction correspondence to ground truth.}
-    \label{box-rf-1m-uncor-hm}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/boxplots/2019-03-19-rf-2m-uncor-box}
-    \caption{Random Forest two-step model prediction correspondence to ground truth.}
-    \label{box-rf-2m-uncor-hm}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=0.8\textwidth]{article-figures/boxplots/2019-03-19-rf-3m-uncor-box}
-    \caption{Random Forest three-step model prediction correspondence to ground truth.}
-    \label{box-rf-3m-uncor-hm}
-\end{figure}
 
 \subsection{Covariate importance}
 
