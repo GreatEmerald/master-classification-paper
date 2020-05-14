@@ -384,10 +384,11 @@ The processing was done using the \texttt{ranger} package \citep{ranger}.
 Since the number of covariates is imbalanced by group (i.e. there are merely 3 location covariates and 168 soil covariates, which are often collinear), covariate importance was assessed by permuting all covariates in a group and reporting the decrease in \ac{RMSE} resulting from that.
 
 \subsection{Model tuning (multi-step approach) to account for value imbalance}
+\label{sec-multistep}
 
 After determining the method that performs the best, we attempted to tune it further in an attempt to solve the dataset balance (zero inflation) problem.
 As the dataset is dominated by zeroes and hundreds, minimising the objective function tends to draw the model towards predicting 0\% fractions well, and ignoring the prediction errors in the middle of the 0-100\% range.
-This is not desirable for users of land cover fraction data, as the added value of fractions is the information about the middle of the range; otherwise, discrete classification would be just as good.
+This is not desirable for users of land cover fraction data, as the added value of fraction information is the information about the middle of the range; otherwise, discrete classification would be just as good.
 Therefore we tried several approaches to increase the accuracy of the middle predictions.
 
 We compared a single model of the best algorithm, to a two-step approach: one model to predict zeroes, and one model to predict non-zeroes; and a three-step approach, with one model to predict pixel purity (i.e. if we face a classification or a regression problem), one to perform regression (on mixed pixels) and one to perform classification (on pure pixels).
@@ -451,6 +452,10 @@ This is further evidenced by a much better result obtained by the binary relevan
 There was a trade-off between optimisation for \gls{MAE} and \gls{RMSE}, i.e. between penalising for large misclassifications or not.
 Models that had lower \gls{MAE} were more crisp, whereas models with lower \gls{RMSE} were more fuzzy.
 Models that achieved lowest \gls{MAE}, in cases of high uncertainty tended to predict 100\% fractions more often, but risk misclassification, whereas models with lowest \gls{RMSE} would predict a mix of all classes that could be within the pixel, thus more often being partially but not completely wrong.
+
+Overall accuracy and kappa statistics from the \gls{SCM} coincided with the \gls{MAE} scores, whereas \gls{NSE} coincided with the \gls{RMSE} scores.
+This is due to the \gls{NSE} being a representation of how close the data is to the 1:1 line with the validation data, where big outliers have a large effect on the value.
+The \gls{SCM} does not take this into account, as it does a comparison on the overlap of fractions in each pixel, which doesn't apply an extra penalty for large errors.
 
 All tested models had difficulty discerning the vegetation classes (grassland, trees, crops, shrubs) between each other, and less so with the non-vegetated land cover (water, urban, bare soil).
 This was exacerbated by the imbalance in class distribution: the urban class is simple to predict well due to the fact that it is rare and very rarely forms a majority, therefore a guess of 0\% is usually a good one.
@@ -531,6 +536,29 @@ Cubist regression
 \end{figure}
 
 \subsection{Adjustment for zero inflation}
+
+Since \gls{RF} regression resulted in the lowest RMSE, it was used for testing the effect of the multi-step approach detailed in section \ref{sec-multistep}.
+The overall results can be seen at the bottom of table \ref{tab-accuracy}.
+
+For an \gls{RF} regression when the mean of all tree votes was used as the indicator for the land cover fraction, using a two-step approach improved the \gls{MAE} of the model, while increasing \gls{RMSE}.
+This is because the false positives in the first step of the two-step model (the binary zero/non-zero classification) result in some high fractions nevertheless being set to zero.
+But on average it does improve the accuracy, since without this adjustment, \gls{RF} regression would almost never assign the precise value of 0\% to a fraction, and thus result in some error for all pixels.
+With this adjustment, it is possible to predict the result perfectly in the cases where the fraction is 0\%, which is the most common case.
+
+However, the two-step approach combined with binary relevance also introduced a drawback in that there were cases where all land cover class fractions were predicted to be 0\% in the first step.
+In such cases it was not possible to determine the land cover fractions, and to make them sup up to 100\%, they were all set to equal parts ($100\% / 7$), which introduced further error.
+
+The three-step approach solved this issue, since the first step would not predict zeroes but rather purity.
+In the case of pure pixels, they would be passed to \gls{RF} classification, which would always return the most likely pure class.
+For mean vote \gls{RF}, the result was not significantly different from the two-step approach.
+While this approach improved also the case of predicting the 100\% fractions precisely, the addition of another model caused extra error that would propagate through the process, negating the gain.
+
+Another option explored for dealing with the issue of zero inflation was to use the median of all tree votes in \gls{RF} instead of the mean.
+This had a comparable effect to using the multi-step approach, as it resulted in a lot more precise predictions for fractions with 0\%.
+However, in the cases with high uncertainty, the median vote was much more likely to predict a 100\% fraction, and thus was also more likely to misclassify a pixel completely.
+Thus it resulted in much higher \gls{RMSE} and much lower \gls{MAE}.
+Using a multi-step approach together with median vote resulted in little difference, as the two approaches have a similar effect.
+The three-step approach was an overall improvement to the single-step approach, albeit a small one.
 
 \subsection{Covariate importance}
 
