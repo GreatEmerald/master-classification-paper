@@ -10,7 +10,8 @@
 \usepackage{indentfirst}
 \usepackage{booktabs} % For \toprule, etc.
 \usepackage[sort&compress,sectionbib]{natbib}
-\bibliographystyle{newapa}
+\usepackage{graphicx}
+\bibliographystyle{apalike}
 
 % Custom packages
 \usepackage[acronym,toc,shortcuts,nohypertypes=acronym]{glossaries}
@@ -20,16 +21,6 @@
 \usepackage{textcomp} % \texttimes
 %\usepackage[pdf]{graphviz} % Importing dot files; can be replaced with generated PDFs
 \usepackage[norefs,nocites]{refcheck} % Develop: warn if figure is not referenced
-
-% Track changes package, remove when final; using a drop-in rather than the old version in TeX Live
-% Usage: \added, \deleted, \replaced{new}{old}, \highlight, \comment
-% All followed by an optional [id=<your id>, comment=<some comment>]
-\usepackage[xcolor={usenames,dvipsnames}]{changes}
-\definecolor{gem}{HTML}{003300}
-\definechangesauthor[color=gem]{dm}
-\definechangesauthor[color=NavyBlue]{jv}
-\definechangesauthor[color=Purple]{nt}
-\definechangesauthor[color=Mahogany]{mh}
 
 % My own definition for the sections that start with a bold name but don't appear in TOC
 \newcommand{\minisection}[1]{\medskip \textbf{#1:}}
@@ -74,6 +65,8 @@
 \newacronym{TPI}{TPI}{Terrain Position Index}
 \newacronym{OSAVI}{OSAVI}{Optimised Soil-Adjusted Vegetation Index}
 \newacronym{NDVI}{NDVI}{Normalised Difference Vegetation Index}
+\newacronym{NDMI}{NDMI}{Normalised Difference Moisture Index}
+\newacronym{NIRv}{NIRv}{\gls{NIR} of vegetation}
 \newacronym{NIR}{NIR}{near infra-red}
 \newacronym{SCM}{SCM}{subpixel confusion-uncertainty matrix}
 \newacronym{FNC}{FNC}{fuzzy nearest centroid}
@@ -94,6 +87,16 @@
 \maketitle
 
 \linenumbers
+
+\minisection{Highlights}
+
+\begin{itemize}
+    \item 11 statistical and machine learning models tested for land cover fraction mapping
+    \item Random forest regression performed the best, with RMSE of 17.3 globally
+    \item A three-step regression method proposed, which results in the lowest MAE of 7.9
+    \item Remote sensing data was the most important for model predictions, but all auxiliary data also contributed significantly
+    \item Global wall-to-wall land cover fraction maps produced and their errors assessed
+\end{itemize}
 
 \abstract{Currently most global land cover maps are produced with discrete classes, which express the dominant land cover class in each pixel, or a combination of several classes at a particular ratio. In contrast, land cover fraction mapping allows for expressing the proportion of each pure class in each pixel, which increases precision, reduces legend complexity, and allows users the flexibility of defining their own mosaic discrete classes using thresholds they define themselves. To map land cover fractions, regression rather than classification algorithms are needed, and multiple approaches are available for this task.
 
@@ -118,16 +121,16 @@ This research proves that machine learning algorithms can be applied globally to
 
 \section{Introduction}
 
-\begin{enumerate}
- \item Relevance of fractional LC mapping (link to user requirements and SDGs)
- \item Studies that have looked into fractional LC mapping so far
- \item Available fractional methods that were introduced in literature (wavelet transform etc.)
- \item Methods that are tested in this paper
- \item Global land cover maps
-\end{enumerate}
+% \begin{enumerate}
+%  \item Relevance of fractional LC mapping (link to user requirements and SDGs)
+%  \item Studies that have looked into fractional LC mapping so far
+%  \item Available fractional methods that were introduced in literature (wavelet transform etc.)
+%  \item Methods that are tested in this paper
+%  \item Global land cover maps
+% \end{enumerate}
 
 Land cover, as one of the key variables for monitoring a number of \glspl{SDG}, has received attention in recent years, and new global land cover maps have emerged to better map the current land cover of the world, as well as to track land cover change.
-Some of the recent achievements have been the \ac{LC-CCI} map \highlight[id=dm, comment=Is there a better citation?]{\citep{defourny2012cci}} that aims at maintaining a long medium-resolution time series of global land cover for the climate community, \highlight[id=dm, comment=ditto]{\ac{CGLS-LC100}} map that aims at a finer spatial resolution and high quality with yearly updates since 2015, and the \ac{FROM-GLC} map \citep{fromglc2019} that showcases the potential of land cover mapping at 10 m resolution.
+Some of the recent achievements have been the \ac{LC-CCI} map \citep{defourny2012cci} that aims at maintaining a long medium-resolution time series of global land cover for the climate community, \ac{CGLS-LC100} map that aims at a finer spatial resolution and high quality with yearly updates since 2015, and the \ac{FROM-GLC} map \citep{fromglc2019} that showcases the potential of land cover mapping at 10 m resolution.
 
 Most of these global land cover maps, as well as previous global land cover maps such as by \citet{bartholome2005glc2000, friedl2010modis, arino2007globcover, see2015hybrid, chen2015globeland30}, are provided as discrete classes (also known as ``hard'' or ``crisp'' classification), where each pixel of the map can only represent a single class.
 However, this results in less precise estimation of land cover due to mixed pixels, where in reality there are multiple land cover classes in the area covered by a single pixel.
@@ -135,7 +138,9 @@ This issue becomes worse at coarse resolutions and heterogeneous landscapes.
 It may result in biases, for instance, a sparse forest may be classified as grassland, ignoring the relatively few trees in the area, and thus ultimately lead to an underestimation of tree cover at large scales.
 
 A potential solution to this issue is land cover fraction mapping, where instead of a discrete class, the proportion of every class in the legend is reported for every pixel of the map.
-This is also called ``fuzzy'' or ``soft'' classification, and sometimes ``subpixel'' classification or ``linear mixture modelling'' \citep{Okeke2006fuzzyexponent}. A related term is ``super
+This is also called ``fuzzy'' or ``soft'' classification, and sometimes ``subpixel'' classification or ``linear mixture modelling'' \citep{Okeke2006fuzzyexponent}.
+Related terms are ``super-resolution mapping'' and ``subpixel mapping'', but this concept relates also to the allocation of land cover fractions inside a pixel spatially, rather than just determining the fraction ratio per pixel.
+
 Land cover fraction mapping has been attempted in the past, both in research \citep{adams_classification_1995, foody1996fuzzyevaluation, colditz_land_2011, sharma_assessing_2011, uma_shankar_wavelet-fuzzy_2011, dwivedi_optimisation_2012, lizarazo_quantitative_2012, gessner_estimating_2013, okujeni_generalizing_2018} and production (e.g. \citealp{hansen2000hardtree, hansen_continuous_2011, pengra_global_2015, hansen_global_2003, sexton_global_2013}).
 Nevertheless, to date only \ac{CGLS-LC100} provides a global map with fractions of every major land cover class.
 
@@ -143,33 +148,6 @@ Land cover fraction mapping can be performed using a variety of different approa
 In its core, it is a regression rather than a classification problem, as the output is a fraction of a label rather than a label itself.
 Popular approaches include fuzzy nearest centroid regression \citep{zhang2001fullyfuzzy}, \ac{SMA} (e.g. \citealp{yang_landsat_2012, hobbs2003linear, shimabukuro1991least}), \ac{RF} regression \citep{schwieder_estimating_2014}, \gls{SVM} regression \citep{schwieder_estimating_2014}, \gls{MLP} \glspl{NN} \citep{zhang2001fullyfuzzy}, genetic algorithms \citep{stavrakoudis_boosted_2011} and wavelet transformation \citep{uma_shankar_wavelet-fuzzy_2011}.
 So far other studies have only compared a few of these methods at once, and never with an exhaustive set of land cover classes nor a global scale.
-
-
-%The second drawback of current global land cover products is that their classification accuracy tends to be low, averaging at around 65\% \citep{tsendbazar2016integrating}. The third drawback is that all of these products use what is known as ``hard'' or ``crisp'' classification: each pixel is assigned to one particular land cover class only. The result of a hard classification is a thematic map. This classification type treats each pixel as homogeneous with regards to land cover, which is rarely the case in reality. In contrast, a ``fuzzy'' or ``soft'' classification, sometimes also called ``subpixel'' classification or ``linear mixture modelling'' \citep{Okeke2006fuzzyexponent} identifies the proportion of each land cover class within each pixel. The result of a fuzzy classification is one map per land cover class, showing the proportion of the pixel area covered by the land cover class.
-
-%Hard classification is not well-suited for coarse resolution imagery, due to a large proportion of mixed pixels in it (representing areas of mixed land cover), compared to endmember pixels (or pure pixels, which are dominated by a single land cover class). When hard classification is attempted on such imagery, the accuracy of the result can be no higher than the area fraction that the dominant land cover type of the pixel occupies \citep{latifovic2004accuracy}. There have been attempts at increasing accuracy by defining mosaic classes, such as mixed forests (50\% needleleaf and 50\% broadleaf trees), but it leads to a proliferation of classes that increases map complexity and still does not deal with the core problem, thus not improving the classification accuracy by much \citep{tsendbazar2016comparative}. In contrast, ``fuzzy'' or ``soft'' classification results in each pixel containing information about the proportion of each class within that pixel, therefore operating on sub-pixel scales. This has the advantage of representing land cover more accurately, and gives the ability to represent mosaic classes as a combination of pure classes instead. Since the output of fuzzy classification is one raster per land cover class, with smooth transitions between classes, it is suitable for more in-depth analysis and user-specific visualisation criteria \citep{tsendbazar2016integrating}. Despite that, hard classification is still the most often used classification type due to the number of algorithms developed for it, ease of storing the result (it is thematic and thus takes little storage space), displaying it in a single map (albeit in a less accurate fashion) and performing accuracy assessment.
-
-%There is a number of different classification algorithms, but only several of them are suitable to be used for fuzzy classification \citep{nath2014methods}. The two methods most commonly used in scientific literature are fuzzy \textit{c}-means and neural networks \citep{zhang2001fullyfuzzy}. Neural networks in particular are well-suited for fuzzy classification, since they allow multiple continuous output as well as input variables in a single model \citep{foody1997fuzzynnet}. Fuzzy \textit{c}-means, also known as fuzzy \textit{k}-means or soft \textit{k}-means, is a statistical method that relies on the proximity of pixels in feature space to class centroids, and thus is also suitable for fully fuzzy classification. However, since \textit{k}-means is an unsupervised classification algorithm, the ability to make use of training data in fuzzy \textit{c}-means is limited to determining class centroids with more precision \citep{hengl2004fuzzycmeans}.
-
-%In addition, any other algorithms that provide a measure of uncertainty about class membership can be used, such as the ratio of individual tree votes of random forest \citep{breiman2001random} or class probabilities in gradient boosting \citep{friedman2001gradientboost}. While classification uncertainty is not a direct measure of class membership \citep{sytze2000fuzzyset}, they are nonetheless correlated. As such, it has been used by numerous authors as a proxy indicator of class membership, achieving satisfactory classification accuracy \citep{foody2002accuracy}.
-
-%Furthermore, algorithms that can handle continuous variables, but only one response variable (such as random forest), can be used as well, by creating separate models for every class. This approach is called binary relevance \citep{karalas2016br}. Using this approach, the data needs to be post-processed after classification at a pixel level to conform to physical constraints (class membership must be between 0 and 100\% and sum up to 100\%). Random forest has been reported to give higher or equal accuracy results compared to other algorithms, like Support Vector Machines and individual decision trees, in hard classification scenarios using satellite imagery similar to that of PROBA-V \citep{duro2012algorithmcomparison}. Random forest regression was also shown to perform as well as other algorithms in fuzzy classification scenarios \citep{walton2008subpixelrf}, although it is used in much fewer studies on fuzzy classification than the other algorithms mentioned previously. Gradient boosting is an algorithm related to random forest, with the same advantages and disadvantages, but it is known to perform better in machine learning challenges \citep{chen2015higgs} and has not yet been tested on fuzzy land cover classification.
-
-%Accuracy assessment is rather straight-forward for hard classification: typically a confusion matrix is employed for this purpose, showing how many pixels (or in some cases how much area \citep{stehman2009sampling}) in the image have been classified correctly, and how many incorrectly. Such a matrix makes it simple to tell which classes are hard to discern from one another, as well as allows for deriving statistics such as users' accuracy, producers' accuracy, and overall accuracy \citep{foody1996fuzzyevaluation}, as well as variance if probability sampling was used. However, a standard confusion matrix is not applicable in the context of fuzzy classification, since misclassification in this case is not absolute, but rather a matter of degree \citep{foody2002accuracy}. Several solutions, such as distance \citep{foody1996fuzzyevaluation}, cross-entropy and mutual information \citep{lu2007methods} have been suggested as alternatives for fuzzy classification accuracy assessment.
-
-%Visualisation of the fuzzy classification results is also challenging, since each class effectively is a single-channel raster of its own. Three such classes can easily be combined into RGB channels for visualisation, but with more classes it is no longer possible. There have been attempts to develop a method based on the hue, saturation and intensity colour model to allow for a larger number of distinct classes to be visualised on a single raster \citep{hengl2004fuzzycmeans}. There is also a possibility of ``hardening'' the classification when high accuracy visualisation is not needed, and making use of multiple RGB rasters side-by-side when it is needed.
-
-%All in all, even though global land cover mapping has been a focus of many other studies, existing global land cover maps still have room for improvement. This can be achieved by using data from the sensors of newer satellites such as PROBA-V, as well as performing fuzzy classification as opposed to the traditional hard classification.
-
-%An important long-term goal of land cover mapping is to have a highly accurate fuzzy land cover classification method at a global scale. Since there are many different methods that could be used to achieve such a goal, and since the amount of data generated by satellites covering the entire world is enormous, this thesis focuses on comparing several different fuzzy classification methods on a subset of global imagery provided by the PROBA-V satellite.
-
-%PROBA-V is a relatively new satellite, with few studies using it for land cover classification so far. A number of studies have used simulated PROBA-V data in preparation for its launch \citep{stathakis2014probavurban,roumenina2013probavcrops,bartalev2014probavboreal}. After launch, most studies have focused on its potential for crop classification \citep{roumenina2015probavcrops,durgun2016crop,lambert2016cropland}. All of these studies have only used the traditional hard classification. As such, the potential of using PROBA-V data for fuzzy classification in order to obtain a more accurate representation of land cover at global scale has never been tested before.
-
-%Another problem of land cover classification is that there is high disagreement between different land cover products on mixed classes, such as mixed forests \citep{Herold2008lccomparison}. Mixed forests and wetlands are challenging to detect and classify using hard classification and optical remote sensing data, so it is important to check how well large-scale fuzzy classification performs on these classes. Therefore this thesis focused specifically on the region of ecotone from boreal forests to temperate broadleaf forests in Europe. This region also includes a large number of boreal wetlands. 
-
-%In addition, there is a wide variety of methods that can be used for fuzzy classification. Most studies on this topic focus on comparing only two methods at once. In this thesis, four of them have been tested: fuzzy \textit{c}-means, neural networks, random forest regression and multiclass gradient boosting. All of these methods are based on fundamentally different approaches to classification, so the results give insight into the possible performance of similar methods as well. In addition, the last of the mentioned methods has not yet been tested on fuzzy classification itself (although related methods have been).
-
-%When it comes to global image processing, one problem is the amount of data and the time it takes to process it. Some algorithms are known to suffer from the curse of dimensionality, where a linear increase in input data results in a geometric increase in processing time \citep{walton2008subpixelrf}. Therefore it is important to also measure the processing time of different classification methods.
 
 In addition to classification methods, one aspect that is important for classification accuracy is the data (covariates) that the algorithm is trained on and predict land cover from \citep{yu2014metadiscoveries}. In addition to spectral covariates (blue, red, near infrared, shortwave infrared bands), temporal covariates (growing season start, duration, growing intensity) are commonly used to improve the separability of crops \citep{jakubauskas2001harmonic}. Elevation covariates (elevation, slope, aspect) are known to improve the separability between tree classes \citep{burrough2001fuzzy}. \Glspl{VI} have been used to improve the detection of wetlands \citep{sader1995wetlands}, as well as for defining classification rules in rule-based fuzzy classification \citep{baraldi2006rulebased}. Therefore in this paper such covariates have also been used in order to increase land cover classification accuracy, and their importance for prediction was analysed.
 
@@ -321,12 +299,21 @@ See table \ref{tab-inputdata} for an overview.
 
 \subsection{Land cover fraction mapping methods}
 
-For deriving land cover fractions, we compared a wide array of machine learning regression methods: \ac{FNC}, \ac{MLP} \glspl{NN}, \ac{PLS} regression, Lasso regression, \ac{MLR}, \ac{RF} regression.
-% * <Dainius Masiliūnas> 16:05:16 07 Aug 2019 UTC+0200:
-% Perhaps also SVM and MESMA
+For deriving land cover fractions, we compared a wide array of machine learning regression methods: \ac{FNC}, \ac{GLM}, \ac{PLS} regression, Lasso regression, \ac{MLR}, \ac{MLP} \glspl{NN}, \glspl{SVM}, Cubist and \ac{RF} regression.
 In addition, as a baseline we also compare the results with an intercept model (all fractions always predicted to be equal).
 
 All of the models were made using the free and open-source statistical software R \citep{r_2019}.
+
+\subsubsection{\Glsentryfull{GLM}}
+
+\Gls{GLM}, also known as multivariate linear regression, is an extension to a regular linear regression that allows for multiple outcomes.
+In this study, we used \gls{GLM} as a baseline model.
+\Gls{GLM} does not normalise the output to add up to 100\%, and also allows negative predictions.
+Therefore all predictions < 0 were capped to 0, and then all values were linearly rescaled per each prediction to add up to 100\%.
+
+We also tested whether dropping any covariates would result in better predictions, using a sphericity test with Greenhouse-Geisser correction to compare models with different covariates.
+However, only three covariates could be dropped and it did not improve the predictions, therefore we decided to keep all the covariates in the model.
+\Gls{GLM} is implemented in base R \citep{r_2019}.
 
 \subsubsection{Lasso/ridge/elastic net regression}
 
@@ -335,24 +322,26 @@ Lasso regression is based on the same principle, except it reduces the coefficie
 Elastic net regression is a method combining the two, where model coefficients may be reduced or set to zero.
 This has the effect of the coefficients of correlated covariates being set to a similar value.
 
-Since we performed a manual covariate selection prior to running regularisation to remove highly correlated covariates, and having a further reduced set of covariates is useful for other algorithms, for this method we chose Lasso regression.
-Lasso regression builds upon least squares, and thus the classes are predicted separately to each other, using the binary relevance approach as presented by \citet{karalas2016br}.
-Therefore, the output fractions do not necessarily sum to 100\%.
-As such, they were linearly scaled.
+We chose lasso regression, so that it would be possible to identify if there are any covariates that could be further omitted in addition to ones dropped in section \ref{sec-covariate-selection}.
+The $\lambda$ parameter was chosen using cross-validation.
+
 The lasso regression was performed using the \texttt{glmnet} package \citep{glmnet}.
+This method is multivariate in the same way that \gls{GLM} is, and the output was clamped to positive numbers and rescaled to add up to 100\% the same way.
 
 \subsubsection{\Glsentryfull{PLS} regression}
 
 \ac{PLS} regression is a concept related to principal component regression and also aims at reducing the input covariates into latent variables that explain the most variance of the response variable in multidimensional space \citep{martens_multivariate_1992}.
 As such, it is well suited for multicollinear data.
-Due to this property, the \highlight[id=nt,comment={would you not agree for better comparability just use the same set of covariates?}]{full set of covariates} were used as input to this model, rather than the reduced (uncorrelated) set.
+This method is also multivariate in the same way that \gls{GLM} is, and the same method was used to clamp and rescale the predictions.
 \ac{PLS} regression was performed using the package \texttt{pls} \citep{pls}.
 
 \subsubsection{\Glsentryfull{FNC} regression}
 
 \Gls{FNC} regression, also called fuzzy nearest prototype, fuzzy $c$-means or fuzzy $k$-means, is a simple regression method where the pixel's membership of a class is determined by the distance of the pixel from the class centroid in feature space.
 This method always produces output that sums to 100\%.
+
 In this study, we used an implementation adapted from the package GSIF \citep{hengl2004fuzzycmeans}.
+We tested both using a logistic regression to estimate the class centroids, as well as using a weighted average of the training data to do so, and ended up using the latter method as the result was more accurate.
 
 \subsubsection{\Glsentryfull{MLR}}
 
@@ -366,22 +355,55 @@ The logistic regression implementation was provided by the \texttt{nnet} package
 
 \subsubsection{\Glsentryfullpl{NN}}
 
-\Glspl{NN} are a promising technique for land cover fraction mapping, as they allow both multiple inputs and multiple outputs, and, using the softmax activation function, also ensures that the result sums up to 100\%.
-In this study, we used a multilayer perceptron with two layers of 256 neurons and softmax activation.
+\Glspl{NN} are a promising technique for land cover fraction mapping, as they allow both multiple inputs and multiple outputs, and, using the softmax activation function, also ensures that the result sums up to 100\% with no need for any postprocessing.
+In this study, we used a multilayer perceptron with three hidden layers with 128, 64 and 32 neurons per layer respectively.
+Softmax activation was used to get the output.
+The Nadam optimiser \citep{dozat_incorporating_2016} was used, with \gls{MAE} as the loss function.
 The \texttt{keras} package \citep{keras}, built upon TensorFlow, was used as the \ac{NN} implementation, and for the ability to make use of a graphics card to accelerate the neural network training process.
 
 \subsubsection{\Glsentryfull{RF} regression}
 
-\ac{RF} regression is a popular method for land cover classification that works by building a number of decision trees based on random subsets of the input training data, and averaging the ``votes'' of these individual trees.
+\ac{RF} regression is a popular method for land cover classification that works by building a number of decision trees based on random subsets of the input training data, and taking the mean or median of the ``votes'' of these individual trees \citep{breiman2001random}.
 \ac{RF} can only take one variable as the response variable, therefore there are two ways to obtain land cover fraction predictions from an \ac{RF} model.
 One way is analogous to how we performed \ac{MLR}: giving labels of the dominant land cover class as the response variable, and then considering the proportion of votes from the trees as the proportions of land cover classes in the pixel.
-The second way is binary relevance, where a separate model is trained to predict the presence of each class.
-Then the predictions are scaled to sum up to 100\%.
-In this study, we chose the second approach, so that the model for each class would be able to learn from the fractions of all the input data, rather than just the labels of the dominant land cover class.
+The second way is binary relevance, where a separate model is trained to predict the presence of each class \citet{karalas2016br}.
+Then the predictions are scaled linearly to sum up to 100\%.
+In the case of \gls{RF}, output values do not need to be clipped as their range is always within the constraints of the input data range.
+In this study, we chose the binary relevance approach, so that the model for each class would be able to learn from the fractions of all the input data, rather than just the labels of the dominant land cover class.
 The processing was done using the \texttt{ranger} package \citep{ranger}.
 
 \ac{RF} was also used for assessing the covariate importance.
-Since the number of covariates is imbalanced by group (i.e. there are merely 3 location covariates and 168 soil covariates, which are often collinear), covariate importance was assessed by permuting all covariates in a group and reporting the decrease in \ac{RMSE} resulting from that.
+Permutation importance was used: each covariate was shuffled in turn, and the resulting decrease in \gls{RMSE} was calculated, comparing against the validation data set.
+Since the number of covariates is imbalanced by group (i.e. there are merely 3 location covariates and 22 spectral covariates), and there may still be colinear covariates, we also tested calculating covariate importance by permuting all covariates in a group together.
+However, the result was similar to the sum of permutation importance of each individual covariates in the group, which showed that the covariate selection process had eliminated all colinear covariates.
+Thus we reported the more detailed covariate importance permuted per individual covariate.
+
+\subsubsection{Cubist regression}
+
+Cubist regression \citep{cubist} is based on \gls{RF} regression, with the major difference being that instead of using a threshold of a covariate for a split in the decision tree, Cubist instead uses a linear regression based on a subset of the data relevant for the split in question.
+In addition, it features committees, a boosting technique that iteratively trains trees so as to learn from the previous ones.
+For our dataset, 10 committees gave the best result.
+Like with \gls{RF}, Cubist was used with the binary relevance method.
+The \texttt{Cubist} package \citep{cubistpackage} was used for this.
+
+\subsubsection{\Glsentryfull{SVM} regression}
+
+\Glspl{SVM} are machine learning models that attempt to find the optimal boundary between the class clusters in feature space by constructing an optimal dividing hyperplane.
+For land cover fraction classification, we used \gls{SVM} regression based on Least Squares \gls{SVM} \citep{suykens_least_1999}.
+We used the binary relevance method, clamped the output values to the 0-100\% range and linearly scaled them to add up to 100\%.
+The package \texttt{liquidSVM} \citep{liquidSVM} was suitable for this purpose, as it is optimised for processing large datasets such as ours.
+
+\subsubsection{Other methods}
+
+A few more methods were considered, but in the end turned out to be unworkable with our dataset.
+Multivariate \gls{RF} in available in R provided by the \texttt{MutivariateRandomForest} package \citep{MultivariateRandomForest}, which would potentially allow better results than using regular \gls{RF} with binary relevance.
+However, it is not optimised for large datasets, which did not allow to train it on more than 2000 samples at a time, making it incomparable to the rest of the tested methods.
+
+Another model that was considered was SuperLearner \citep{SuperLearner}, an ensembling method that can combine multiple of the tested methods into one model, giving models different weights according to how well they are known to perform for a given task.
+Here we ran into similar issues, as cross-validation is required for each model to train, which increases processing time dramatically.
+Whereas setting the number of folds to a lower number resulted in worse results than when using a single classifier.
+
+Lastly, multiple-endmember spectral unmixing using non-negative least squares was also attempted, but the results were significantly worse than even the intercept model, possibly because the class fractions are not a linear combination of the covariates.
 
 \subsection{Model tuning (multi-step approach) to account for value imbalance}
 \label{sec-multistep}
@@ -394,6 +416,8 @@ Therefore we tried several approaches to increase the accuracy of the middle pre
 We compared a single model of the best algorithm, to a two-step approach: one model to predict zeroes, and one model to predict non-zeroes; and a three-step approach, with one model to predict pixel purity (i.e. if we face a classification or a regression problem), one to perform regression (on mixed pixels) and one to perform classification (on pure pixels).
 
 In addition, we investigated applying histogram matching, by matching the histogram of the predictions back to the histogram of the training set.
+However, that turned out to decrease accuracy in all cases, as the cases where a model predicts a value close to the true value would be set to a more extreme value to compensate for other predictions that were not as accurate to begin with.
+Therefore in the end histogram matching was not used.
 
 \subsection{Validation/Accuracy Assessment}
 
@@ -415,12 +439,6 @@ The numbers obtained are averages and standard deviations of the aforementioned 
 \end{enumerate}
 
 \section{Results}
-
-\begin{enumerate}
- \item Differences between all models, showing the RF has lowest RMSE
- \item Variable importance for RF; stressing importance of RS data by a model with only RS variables
- \item Spatial wall-to-wall demo map and spatial errors
-\end{enumerate}
 
 \subsection{Method accuracy comparison}
 
@@ -468,31 +486,27 @@ In contrast, there were only moderate improvements for predicting the grass frac
 \begin{tabular}{llllll}
 \toprule
 \textbf{Model} & \textbf{\ac{RMSE} (\%)} & \textbf{\ac{MAE} (\%)} & \textbf{\acrshort{NSE}} & \textbf{\ac{OA} (\%)} & \textbf{Kappa} \\
-% * <Dainius Masiliūnas> 14:04:01 13 Aug 2019 UTC+0200:
-% Death to kappa
 \midrule
 Intercept
 & 29.9  & 21.4  & 0     & 26±5  & 0.13±0.07 \\
 \Gls{FNC}
 & 24.4  & 13.5  & 0.33  & 53±4  & 0.42±0.06 \\
-General linear model and \Gls{PLS}
+\Gls{GLM}, \Gls{PLS}, Lasso
 & 21.6  & 12.7  & 0.48  & 56±4  & 0.43±0.05 \\
-Lasso regression
-& 21.4  & 12.6  & 0.49  & 56±4  & 0.43±0.05 \\
+%Lasso regression
+%& 21.4  & 12.6  & 0.49  & 56±4  & 0.43±0.05 \\
 \Gls{MLR}
 & 21.6  & 12.1  & 0.48  & 58±4  & 0.46±0.06 \\
-Multivariate RF
-& 18.7  & 10.0  & 0.61  & 65±3  & 0.55±0.05 \\
+%Multivariate RF
+%& 18.7  & 10.0  & 0.61  & 65±3  & 0.55±0.05 \\
 \Glspl{NN}
-% * <Dainius Masiliūnas> 18:06:02 15 Apr 2020 UTC+0200:
-% Double-check NN results - were they updated?
 & 22.7  & 9.2   & 0.43  & 68±1  & 0.57±0.02 \\
 \Gls{SVM} regression
 & 20.7  & 8.9   & 0.52  & 69±2  & 0.58±0.03 \\
 Cubist regression
 & 18.1  & 8.1   & 0.63  & 72±2  & 0.63±0.03 \\
 \Gls{RF} regression
-& 17.3  & 9.4   & 0.66  & 67±4  & 0.57±0.05 \\
+& \textbf{17.3}  & 9.4   & \textbf{0.66}  & 67±4  & 0.57±0.05 \\
 %\ensuremath{''} histogram matched
 %& 22.0  & 9.7   & 0.43  & 66±2  & 0.58±0.03 \\
 \ensuremath{''} two-step
@@ -504,7 +518,7 @@ Cubist regression
 \ensuremath{''} \ensuremath{''} two-step
 & 20.0  & 8.1   & 0.54  & 72±1  & 0.63±0.02 \\
 \ensuremath{''} \ensuremath{''} three-step
-& 20.2  & 7.9   & 0.54  & 72±2  & 0.64±0.02 \\
+& 20.2  & \textbf{7.9}   & 0.54  & \textbf{72±2}  & \textbf{0.64±0.02} \\
 %\ensuremath{''} \ensuremath{''} histogram matched
 %& 21.3  & 9.1   & 0.46  & 68±3  & 0.61      \\
 \bottomrule
@@ -512,28 +526,6 @@ Cubist regression
 \caption{Accuracy statistics of the models tested.}
 \label{tab-accuracy}
 \end{table}
-
-% Maps
-\begin{figure}
-    \includegraphics[width=\textwidth]{article-figures/maps/2019-03-26-rf-1m-bubble}
-    \caption{Random Forest single model prediction residuals per class, spatially}
-    \label{resid-rf-1m-uncor}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=\textwidth]{article-figures/maps/2019-03-26-rf-3m-bubble}
-    \caption{Random Forest three-step model prediction residuals per class, spatially}
-    \label{resid-rf-3m-uncor}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=\textwidth]{article-figures/maps/2019-04-10-rasterised-validation}
-    \caption{Validation data spatially}
-    \label{raster-validation}
-\end{figure}
-\begin{figure}
-    \includegraphics[width=\textwidth]{article-figures/maps/2019-04-10-rasterised-rf-1m-uncor}
-    \caption{Random Forest single model predictions spatially}
-    \label{raster-rf-1m-uncor}
-\end{figure}
 
 \subsection{Adjustment for zero inflation}
 
@@ -562,39 +554,192 @@ The three-step approach was an overall improvement to the single-step approach, 
 
 \subsection{Covariate importance}
 
+\Gls{RF} permutation importance was performed to test which variables were important for \gls{RF} regression predictions.
+The single-step \gls{RF} model was selected for this as it achieved the lowest \gls{RMSE}.
+The results are shown in figure \ref{fig-varimp}.
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{article-figures/heatmaps/2020-05-12-varimp-heatmap-top10}
+    \caption{Random Forest single model variable importance, top 10 covariates per category.}
+    \label{fig-varimp}
+\end{figure}
+
+The overall most important variables were the maximum and minimum NDVI over the whole time series of Proba-V imagery.
+They were followed by the median NDMI and NIRv over the whole time series.
+These vegetation indices were of lower importance only for the shrub and crop classes.
+These two classes are complicated to distinguish from other natural vegetation, and thus benefited from a wide variety of additional covariates, including location and climate information.
+
+To distinguish crops in particular, soil information such as pH, bulk density and sand fraction was useful for the model.
+Crops are usually grown in fertile soils that can sustain them, and due to the fact that cropland is further managed, the soil is also altered to be more fertile, which affects these soil properties.
+In addition, the crop prediction model benefited from harmonic metrics derived from time series the most.
+The second order amplitude and sine of the harmonic model of the time series allows the model to detect areas with a double harvest throughout the year, which is indicative of crops.
+
+Climate data was also most useful for predicting crops, especially the mean temperature and the closely (exponentially) related mean of water vapour pressure.
+All of the natural precipitation class predictions benefited from (log-transformed) annual precipitation, solar irradiance in January and isothermality.
+
+Location data was most useful for crop prediction, and to a lesser extent for grassland, shrubland and tree prediction.
+These classes tend to be spatially clustered into large areas.
+In contract, location information was not useful for inland water prediction as it is a rare class that takes little area.
+Both absolute and regular latitude was useful for the prediction, and latitude was more useful than longitude for the predictions.
+
+Terrain information was the least useful covariate category.
+It was most useful for crops and water, as crops are inconvenient to grow on slopes or in high altitudes.
+Aspect and \gls{TPI} were only useful for the water class, as standing water has no aspect and a \gls{TPI} of zero, as it has a slope of zero too.
+
+\subsection{Spatial predictions and accuracy}
+
+We used the single-step \gls{RF} model to predict the land cover at a global scale to obtain wall-to-wall global land cover fraction maps.
+See figure \ref{fig-walltowall} for a visualisation (sampled at 0.2 degrees) of all the fraction layers combined.
+The wall-to-wall fraction maps reveal how land cover fraction mapping is capable of expressing gradients and mixed land cover.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{article-figures/maps/2020-05-25-walltowall}
+    \caption{Wall-to-wall predictions of all seven land cover class fractions using the single-step \gls{RF} regression model.}
+    \label{fig-walltowall}
+\end{figure}
+
+In addition, to see whether there were any patterns in the accuracy of the predictions globally, we produced spatial accuracy maps based on the predictions in locations where we had independent validation data.
+This is presented in raster format in figure \ref{fig-resid-rf-1m-uncor}.
+
+\begin{figure}
+    \centering
+    \includegraphics[height=0.8\textheight]{article-figures/maps/2020-05-22-spatialerrors}
+    \caption{Random Forest single model prediction absolute errors per class, based on predictions at point locations of validation data, displayed aggregated over 1 by 1 degree cells using the mean function.}
+    \label{fig-resid-rf-1m-uncor}
+\end{figure}
+
 \section{Discussion}
 
-\begin{enumerate}
- \item Fraction mapping methods:
- \begin{enumerate}
-    \item RF is the best, even though one model per class means that it does not take everything into account
-    \item Fraction area accuracy goes up to 72\%, that is good considering that hard classification is not much better than that
-    \item Hardest to classify are grasslands and especially shrubs and urban
-    \item Accuracy assessment metric makes a big difference, useful to use subpixel confusion matrix for that
- \end{enumerate}
- \item Optimising for zero inflation:
- \begin{enumerate}
-    \item Multi-step models improve MAE at the cost of RMSE and NSE
-    \item Histogram matching doesn't help any
- \end{enumerate}
- \item Covariate importance:
- \begin{enumerate}
-    \item All covariates are important to a certain degree (show table of importances)
- \end{enumerate}
-\end{enumerate}
+% \begin{enumerate}
+%  \item Fraction mapping methods (Methods):
+%  \begin{enumerate}
+%     \item RF is the best, even though one model per class means that it does not take everything into account
+%     \item Fraction area accuracy goes up to 72\%, that is good considering that hard classification is not much better than that
+%     \item Hardest to classify are grasslands and especially shrubs and urban
+%     \item Accuracy assessment metric makes a big difference, useful to use subpixel confusion matrix for that
+%  \end{enumerate}
+%  \item Optimising for zero inflation (Challenges):
+%  \begin{enumerate}
+%     \item Multi-step models improve MAE at the cost of RMSE and NSE
+%     \item Histogram matching doesn't help any
+%  \end{enumerate}
+%  \item Covariate importance (Variables):
+%  \begin{enumerate}
+%     \item All covariates are important to a certain degree (show table of importances)
+%  \end{enumerate}
+% \end{enumerate}
+
+\subsection{Methods}
+
+\Gls{RF} regression using binary relevance performed the best of all the tested algorithms.
+It was also adaptive to two different goals: minimising \gls{RMSE} (default) and minimising \gls{MAE} (with median voting).
+The three-step Median \gls{RF} model achieved an overall accuracy of 72±2, which is high considering that discrete global land cover maps typically achieve around 70\% accuracy \citep{herold_challenges_2008}.
+In contrast, land cover fraction mapping is expected to be more challenging than discrete classification.
+This is because land cover fractions contain the information for all of the land cover classes considered in each pixel, and this information needs to be retrieved from discrete pixels, with no prior information about class allocation within the pixel.
+
+Compared to other studies that compared different machine learning algorithms for land cover fraction classification, we have achieved a much lower \gls{MAE}.
+\citet{li_monitoring_2018} compared Cubist and \gls{RF} regression for water fraction classification and achieved \gls{MAE} as low as 7.52\% and \gls{RMSE} of 10.39\% with Cubist.
+Our equivalent results were 2.57\% \gls{MAE} and 11.51\% RMSE, respectively.
+We have confirmed that Cubist works slightly better than \gls{RF} regression for this class (\gls{RF} regression result is 11.65\% \gls{RMSE}, 3.48\% \gls{MAE}), but overall for all classes \gls{RF} regression nevertheless edges out (Table \ref{tab-accuracy}).
+Similarly, \citet{walton2008subpixelrf} assessed the accuracy of urban land cover mapping and indicated 14.5\% \gls{MAE} and 20.0\% \gls{RMSE} for Cubist, which was also observed as performing better than \gls{RF} regression and \glspl{SVM}.
+Our results were 9.70\% \gls{RMSE} and 2.43\% \gls{MAE} for Cubist over the urban class, and we also observed that Cubist performed slightly better than the other two algorithms for this class.
+\citet{okujeni_comparison_2014} also performed land cover fraction mapping over an urban area, but their results indicated that \gls{SVM} regression performed better than \gls{RF}.
+This could be due to much finer resolution (3.6–9 m) used in their study, and the associated difference in class definitions.
+The differences in the absolute numbers of \gls{RMSE} and \gls{MAE} between these studies and ours are most likely due to the different scope, and thus different balance of the datasets between the studies.
+The other studies focused on a single particular class, whereas both urban and water were relatively rare classes in our global study, and therefore the dataset had much more zero fractions in comparison, which on average are easy to predict.
+
+\subsection{Variables}
+
+Remote sensing variables were the most important variables in our study, especially the maximum and minimum \gls{NDVI} over the entire (temporally-cleaned) time series.
+Multiple vegetation indices were useful, with \gls{NDMI} and \gls{NIRv} median over the time series being still much more important than any other variable from other groups.
+Nevertheless, even though a lot of the other covariates were of much lower importance, they nevertheless contributed to prediction accuracy enough so that they could not be easily excluded from the models as redundant (after the removal of covariates that were correlated over 0.9 as explained in section \ref{sec-covariate-selection}).
+This is also due to the large variety of land cover classes in the study, since a covariate is useful if it helps predict any of the land cover classes better.
+The result that including more covariates is beneficial, but remote sensing data is the most important, is in line with the conclusions of \citet{li_monitoring_2018} and \citet{hengl_soilgrids250m_2017}.
+The latter study also shows high importance of climate data, however, it is focused on soils, whereas climate has more effect on soils than on land cover.
+Methods based on decision trees help with effectively using covariates that may also have an overlap in the information that they provide, although linear models likewise tended to not exclude any covariates as non-informative.
+
+\subsection{Challenges}
+
+One challenge in land cover fraction prediction is the tendency of the models to favour the mean over the extremes, as that minimises \gls{RMSE} that may arise from incorrect predictions.
+However, that leads to increased fuzziness of the result, where pixels with high uncertainty are marked as a mix of many classes, and zero fractions are rarely predicted.
+Our proposed multi-step model adjusts the balance the other way round.
+As it is a combination of one or two classification models and one regression model, the prediction has a lot more pure pixels compared to a single regression model.
+This works very well in reducing \gls{MAE} (and improving the related metrics from the \gls{SCM}), as the especially common case of zero is captured better.
+On the other hand, it comes at a cost of higher \gls{RMSE} and lower \gls{NSE}.
+This is because in highly uncertain cases, the model does a best guess at a pure class, and often it is incorrect, which leads to 100\% error in those cases, which is highly penalised by \gls{RMSE}.
+A similar effect is seen when using techniques such as median vote for \gls{RF} regression.
+This allows for predicting zero fractions correctly more often, but also misclassify completely more often.
+Our results showed that median vote has a stronger effect for reducing \gls{MAE} than the multi-step approach.
+Combining both methods is beneficial to further reduce \gls{RMSE} for median vote predictions.
+
+Therefore the use of a multi-step approach depends on what is more important for the user.
+If an occasional complete misclassification is acceptable, then a multi-step model provides an overall more accurate result, especially for zero fractions.
+On the other hand, a single-step approach emphasises the strength of land cover fraction mapping in being able to express gradual changes over space better, and avoids large misclassifications.
+We expect a multi-step approach to be more suitable for fine resolution mapping, where more pure pixels can be expected, and single-step approach to be more useful for coarse resolution mapping where mixed pixels are the norm.
+
+There is an inherent challenge in land cover mapping for discerning classes that are related, e.g. grass and shrubs.
+Grass was particularly difficult to map, in part due to confusion between grass, crops and shrubs.
+These classes are similar not just to regression algorithms, but also to expert interpreters, which may lead to higher uncertainties also in the training and validation data for these classes.
+Another challenge is class imbalance.
+For example, the urban class is rare, it hardly ever forms a 100\% fraction and its extent small.
+That makes it easy to classify, as a fraction of 0\% is in most cases a good guess, but it that makes it not useful for user needs.
+This challenge is further exacerbated by the training dataset containing relatively few points in urban areas to begin with.
+As such, having a more balanced dataset may lead to a better representation of the accuracy of each class and help with class predictions.
+
+In this study, model optimisation and dataset sizes were also a challenge.
+Each model may have multiple parameters that can be tuned, and the input to each method can also be modified (e.g. by log-transforming covariates or replacing missing values).
+Since the large dataset size increases the training time for the models, parameters to tune have to be chosen carefully.
+As such, it is possible to miss a particular parameter combination that may further improve the results.
+On the other hand, our results showed that the differences between the methods are not very high.
+The differences in model parametrisations are expected to be even lower.
+
+The scale of the study poses performance challenges, as covariates that the models use need to be available at a global scale.
+Our results showed that all of the covariate groups used in the study were useful, therefore leaving a covariate out means sacrificing some predictive power.
+The gain would be less time needed for processing, as that covariate would no longer need to be downloaded, preprocessed and processed.
+In addition, model training performance (time for training and memory usage) may be an important consideration for global land cover mapping, as it may limit the scope of what models may be used for this task.
 
 \section{Conclusions}
 
-\begin{enumerate}
- \item Random forest is the best by some margin
- \item Subpixel confusion matrix is useful for differentiation
- \item All covariates are important but to a different degree
- \item Using a multi-model approach improves MAE at the cost of RMSE, thus a trade-off
-\end{enumerate}
+% \begin{enumerate}
+%  \item Random forest is the best
+%  \item All covariates are important but to a different degree, remote sensing parameters are most important
+%  \item Using a multi-model approach improves MAE at the cost of RMSE, thus a trade-off
+% \end{enumerate}
 
-\minisection{Author Contributions} DM JV NT MH ML MB BS RK
+In this study, we compared 10 algorithms for land cover fraction mapping and created a demonstation map showing the result of the best performing model by \gls{RMSE}.
+We also introduced a multi-step approach to try and tackle the issue of correctly predicting the extreme fraction values of 0\% and 100\%.
+The best performing models were based on \gls{CART} tree ensembles, with \gls{RF} regression performing the best overall.
+A single-step \gls{RF} regression model using majority voting resulted in the best results for RMSE (17.3\%) and \gls{NSE} (0.66).
+Using median voting combined with the three-step approach obtained the best results for \gls{MAE} (7.9\%) and \gls{SCM} \gls{OA} (72±2\%).
+Remote sensing covariates were the most important in the models, although all other types of covariates (climate, soil, terrain) also contributed to the model significantly.
+This demonstrates the possibility of exhaustive global land cover fraction mapping using currently available methods, achieving a comparable accuracy with discrete land cover maps, but offering better precision.
+It also allows the users to define their own thresholds to generate discrete classifications of their own choosing, based on their classes on interest.
 
-\minisection{Funding} JRC CGLOPS
+This work paves the way for operationalisation of global land cover fraction mapping.
+Future work on this field should investigate the implementation of this approach on different sensors, so as to investigate how useful is land cover fraction mapping also on finer resolution imagery, such as Sentinel-2.
+There is also a need to investigate how land cover change can be captured and represented using land cover fractions, so that gradual change over time could be expressed.
+
+\minisection{Author Contributions}
+
+\begin{itemize}
+    \item Conceptualisation: MH NT JV
+    \item Data curation: DM
+    \item Formal Analysis: DM
+    \item Funding acquisition: JV MH BS
+    \item Investigation: DM ML NT
+    \item Methodology: DM MH NT BK LL
+    \item Project administration: MH NT JV
+    \item Resources: MH BS
+    \item Software: DM
+    \item Supervision: MH NT JV
+    \item Validation: NT DM
+    \item Visualisation: DM MH
+    \item Writing – original draft: DM
+    \item Writing – review \& editing: NT JV MH MB BS
+\end{itemize}
+
+DM JV NT MH ML MB BS RK
 
 \minisection{Acknowledgements} VITO, Terrascope, time series group (BB, BK)
 
