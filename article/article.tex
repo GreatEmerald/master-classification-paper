@@ -59,7 +59,6 @@
 \newacronym{SDG}{SDG}{Sustainable Development Goal}
 \newacronym{LC-CCI}{LC-CCI}{ESA Climate Change Initiative Land Cover}
 \newacronym{CGLS-LC100}{CGLS-LC100}{Copernicus Global Land Services 100 m Land Cover}
-%\newacronym{CGLS}{CGLS}{Copernicus Global Land Services}
 \newacronym{FROM-GLC}{FROM-GLC10}{Finer Resolution Observation and Monitoring Global Land Cover}
 \newacronym{IIASA}{IIASA}{International Institute for Applied Systems Analysis}
 \newacronym{WUR}{WUR}{Wageningen University \& Research}
@@ -92,10 +91,6 @@
 \newacronym{LCCS}{LCCS}{UN Land Cover Classification Scheme}
 \newacronym{GDAL}{GDAL}{Geospatial Data Abstraction Library}
 %\makenoidxglossaries
-% Disable abbreviating RF for now [text={random forest}]
-%\glsunset{RF}
-
-% Use \begin{equation} for maths
 
 \begin{document}
 
@@ -141,7 +136,7 @@ This research proves that machine learning algorithms can be applied globally to
 \end{abstract}
 
 \begin{keyword}
-Land cover fraction mapping\sep machine learning\sep random forest\sep Cubist\sep neural networks\sep fuzzy nearest centroid\sep lasso regression\sep PROBA-V
+PROBA-V\sep global land cover mapping\sep land cover fraction mapping\sep time series analysis\sep machine learning\sep random forest\sep Cubist\sep support vector regression\sep neural network\sep spatial accuracy
 \end{keyword}
 
 \end{frontmatter} % end elsarticle only
@@ -285,7 +280,7 @@ In addition, \gls{GDAL} \citep{gdal} was used to calculate terrain parameters ou
 
 For climate data, WorldClim 2.0 30 second product \citep{worldclim2} was used.
 It includes monthly temperature, precipitation, solar radiation, wind speed and water vapour pressure data.
-In addition, 19 bioclimatic parameters were calculated from the data, using the dismo package \citep{dismo}.
+In addition, 19 bioclimatic parameters were calculated from the data, using the \cran{dismo} package \citep{dismo}.
 Some additional biophysical parameters were also calculated, namely all of the climate data during the coldest, warmest, driest and wettest months of the year at each location, as well as yearly averages of each of the original parameters.
 
 SoilGrids \citep{hengl_soilgrids250m_2017} was used for variables related to soils.
@@ -298,7 +293,7 @@ The latitude, longitude and absolute latitude of the reference points were also 
 \subsection{Covariate selection}
 \label{sec-covariate-selection}
 
-In total, 313 covariates were generated in pre-processing.
+In total, 313 covariates were generated in preprocessing.
 However, many of them were collinear with one another.
 Multicollinearity prolongs training time for machine learning models and leads to unreliable coefficient estimation and increased error variance for linear models.
 Thus, variable selection was used to remove collinear covariates before predicting the land cover fractions.
@@ -399,7 +394,7 @@ Therefore for these models, all predictions < 0 were set to 0, and then all valu
 
 \Gls{FNC} regression \citep{keller_fuzzy_1985}, also called fuzzy nearest prototype, fuzzy $c$-means or fuzzy $k$-means, is a simple regression method where the pixel's membership of a class is determined by the distance of the pixel from each class centroid in feature space.
 This method always produces output that sums to 100\%.
-In this study, we used an implementation adapted from the package GSIF \citep{hengl2004fuzzycmeans}.
+In this study, we used an implementation adapted from the package \cran{GSIF} \citep{hengl2004fuzzycmeans}.
 We tested both using a logistic regression to estimate the class centroids, as well as using a weighted average of the training data to do so, and ended up using the latter method as the result was more accurate.
 
 Lastly, we tested \gls{MLR} \citep{theil_multinomial_1969}.
@@ -804,7 +799,7 @@ The challenge here is that the higher uncertainty about fraction estimates may c
 
 \section{Conclusions}
 
-In this study, we compared three groups of algorithms for land cover fraction mapping and created a demonstation map showing the global distribution of land cover in fraction layers, using the best performing model according to \gls{RMSE}.
+In this study, we compared three groups of algorithms for land cover fraction mapping and created a demonstration map showing the global distribution of land cover in fraction layers, using the best performing model according to \gls{RMSE}.
 We also introduced a multi-step approach to tackle the issue of accurately predicting the extreme fraction values of 0\% and 100\%.
 The best performing models were based on \gls{CART} tree ensembles, with \gls{RF} regression performing the best overall.
 A single-step \gls{RF} regression model using majority voting resulted in the best results for RMSE (17.3\%) and \gls{NSE} (0.66).
@@ -817,12 +812,10 @@ Furthermore, given the recent advances in optical sensor spatial resolution and 
 Lastly, due to the advances in spatial and spectral resolution, longer imagery time series of existing sensors, and the availability of non-optical sensor data, this work paves the way towards operational land cover fraction change mapping, which would allow monitoring gradual land cover change.
 
 % Converted from role-centric to person-centric as per Elsevier guidelines: https://www.elsevier.com/authors/journal-authors/policies-and-ethics/credit-author-statement
-\minisection{Author Contributions}
-\textbf{Dainius Masiliūnas}: Methodology, Formal Analysis, Software, Writing – Original Draft, Data Curation. \textbf{Nandin-Erdene Tsendbazar}: Investigation, Data Curation, Supervision, Conceptualisation, Writing – review \& editing. \textbf{Martin Herold}: Conceptualisation, Project Administration, Supervision, Methodology. \textbf{Myroslava Lesiv}: Investigation, Data Curation. \textbf{Marcel Buchhorn}: Writing – review \& editing. \textbf{Jan Verbesselt}: Conceptualisation, Methodology, Supervision, Writing – review \& editing.
+%\minisection{Author Contributions}
+%\textbf{Dainius Masiliūnas}: Methodology, Formal Analysis, Software, Writing – Original Draft, Data Curation. \textbf{Nandin-Erdene Tsendbazar}: Investigation, Data Curation, Supervision, Conceptualisation, Writing – review \& editing. \textbf{Martin Herold}: Conceptualisation, Project Administration, Supervision, Methodology. \textbf{Myroslava Lesiv}: Investigation, Data Curation. \textbf{Marcel Buchhorn}: Writing – review \& editing. \textbf{Jan Verbesselt}: Conceptualisation, Methodology, Supervision, Writing – review \& editing.
 
-\minisection{Acknowledgements} We would like to thank VITO and Terrascope for providing us with computational facilities to access and process {PROBA-V} data, and IIASA for providing the model training dataset. In addition, we thank Bruno Smets for ideas and support from the \gls{CGLS-LC100} project, Benjamin Kellenberger for help on tuning \gls{NN} parameterisation, as well as Linlin Li and Tomislav Hengl for suggestions on additional machine learning methods to test.
-
-%\minisection{Conflicts of Interest} The authors declare no conflict of interest.
+\minisection{Acknowledgements} We would like to thank VITO and Terrascope for providing us with computational facilities to access and process {PROBA-V} data, and IIASA for providing the model training dataset. In addition, we thank Bruno Smets for ideas and support from the \gls{CGLS-LC100} project, Benjamin Kellenberger for help on tuning \gls{NN} parametrisation, as well as Linlin Li and Tomislav Hengl for suggestions on additional machine learning methods to test.
 
 % NOTE: Appendix is in supplement.tex
 
@@ -831,5 +824,7 @@ Lastly, due to the advances in spatial and spectral resolution, longer imagery t
 %\printnoidxglossary[type=acronym]
 
 \bibliography{article-bib}
+
+%\listoffigures
 
 \end{document}
