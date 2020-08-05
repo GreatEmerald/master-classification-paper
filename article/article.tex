@@ -224,7 +224,7 @@ For points with a minority fraction of unknown, the remaining classes were linea
 Thus in the end the training dataset size became 138\,164 and the validation dataset size became 20\,705. See figure \ref{fig-reference-data} for the spatial distribution of the points.
 
 \begin{figure}
- \includegraphics[width=\textwidth]{article/article-figures/maps/2020-07-06-training-and-validation}
+ \includegraphics[width=\textwidth]{article-figures/maps/2020-07-06-training-and-validation}
  \caption{Sample points representing 100x100 m areas at which land cover reference data was used in the study. The colours represent the dominant land cover class at each point. (a): training dataset, collected by \gls{IIASA}, 138\,164 points used in this study. (b): validation dataset, collected by \gls{WUR}, 20\,705 points used in this study. Both datasets were collected as part of the \ac{CGLS-LC100} project \citep{buchhorn_copernicus_2020}.}
  \label{fig-reference-data}
 \end{figure}
@@ -556,7 +556,7 @@ only RS covariates
 \end{table}
 
 \begin{figure}
-    \includegraphics[width=\textwidth]{article/article-figures/barplots/2020-06-03-model-comparison-bar}
+    \includegraphics[width=\textwidth]{article-figures/barplots/2020-06-03-model-comparison-bar}
     \caption{Comparison of \gls{RMSE} (top) and \gls{MAE} (bottom) per class of the best performing models in their category, and the intercept-only model as a reference.}
     \label{fig-models}
 \end{figure}
@@ -599,7 +599,7 @@ The three-step approach was an overall improvement to the single-step approach, 
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{article/article-figures/barplots/2020-06-04-rf-comparison-bar}
+    \includegraphics[width=\textwidth]{article-figures/barplots/2020-06-04-rf-comparison-bar}
     \caption{Comparison of \gls{RF} regression models (intercept model shown as a reference). 1-step models use no adjustment for zero inflation, 2-step models perform classification on zeroes and regression for non-zeroes, 3-step models perform a classification into pure and non-pure pixels, and then a regression or classification based on that. Mean and median are the tree vote summary statistics.}
     \label{fig-randomforest}
 \end{figure}
@@ -668,7 +668,7 @@ Shrub fractions were never predicted above 85\%, and the low fraction prediction
 
 \begin{sidewaysfigure}
     \centering
-    \includegraphics[width=\textwidth]{article/article-figures/maps/2020-07-29-walltowall.png}
+    \includegraphics[width=\textwidth]{article-figures/maps/2020-07-29-walltowall.png}
     \caption{Random Forest single model predictions per class. Top row: predicted fractions, each given its own colour (``Overall'' shows a hardened map of dominant land cover using the same colour scheme). Middle row: absolute errors per class, based on predictions at point locations of validation data, displayed aggregated over 1 by 1 degree cells using the mean function. Bottom row: distribution of predicted versus true values, shown as box plots with bins each 10\%, widths representing sample size.}
     \label{fig-walltowall}
 \end{sidewaysfigure}
