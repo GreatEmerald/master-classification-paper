@@ -1,12 +1,14 @@
-\documentclass[draft,authoryear,3p]{elsarticle}
+\documentclass[authoryear,3p]{elsarticle}
 \journal{Remote Sensing of Environment}
 \bibliographystyle{model5-names}\biboptions{authoryear}
 
 \usepackage{adjustbox}
 \usepackage{array}
 \usepackage{booktabs}
+\usepackage{graphicx}
 
 \renewcommand\thetable{S\arabic{table}}
+\renewcommand\thefigure{S\arabic{figure}}
 
 \begin{document}
 \begin{table}[h!]
@@ -112,5 +114,19 @@ soil water wilting point
 \label{tab-inputdata}
 \end{center}
 \end{table}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{article-figures/barplots/2020-11-02-model-comparison-bar}
+    \caption{Comparison of relative RMSE (top) and relative MAE (bottom) per class of the best performing models in their category, and the equal proportions solution as a reference.}
+    \label{fig-models}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{article-figures/barplots/2020-11-02-rf-comparison-bar}
+    \caption{Comparison of relative accuracy metrics of RF regression models (equal proportion model shown as a reference). 1-step models use no adjustment for zero inflation, 2-step models perform classification on zeroes and regression for non-zeroes, 3-step models perform a classification into pure and non-pure pixels, and then a regression or classification based on that. Mean and median are the tree vote summary statistics.}
+    \label{fig-randomforest}
+\end{figure}
+
 \bibliography{article-bib}
 \end{document}
