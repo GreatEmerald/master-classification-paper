@@ -844,7 +844,7 @@ The results are shown in figure \ref{fig-varimp}.
 \begin{figure}
     \centering
     \includegraphics[width=14cm]{article-figures/heatmaps/2020-11-06-varimp-heatmap-top5}
-    \caption{Random Forest single-step approach variable importance, top 5 features per category. Categories are ordered by cumulative importance. The values represent increase in MAE for the given class when the given feature is permuted.}
+    \caption{Random Forest three-step median approach variable importance, top 5 features per category. Categories are ordered by cumulative importance. The values represent increase in MAE for the given class when the given feature is permuted.}
     \label{fig-varimp}
 \end{figure}
 
@@ -895,7 +895,7 @@ The differences in the absolute numbers of \gls{RMSE} and \gls{MAE} between thes
 
 \subsection{Multi-step approach for dealing with data imbalance}
 
-After determining the baseline methods with the highest, we tested our newly proposed multi-step approach on \gls{RF} regression, comparing the effect with that of median voting instead of mean voting.
+After determining the baseline methods with the highest accuracy, we tested our newly proposed multi-step approach on \gls{RF} regression, comparing the effect with that of median voting instead of mean voting.
 One challenge in land cover fraction prediction is the tendency of the models to favour the mean over the extremes, as that minimises \gls{RMSE} that may arise from incorrect predictions.
 However, that leads to increased fuzziness of the result, where pixels with high uncertainty are marked as a mix of many classes, and fractions of 0\% are rarely, if ever, predicted.
 Our proposed multi-step approach adjusts the balance the other way.
