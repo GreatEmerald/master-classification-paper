@@ -427,7 +427,7 @@ For more technical details and in-depth results of the regression model accuracy
 \subsection{Multi-step approach to account for value imbalance}
 \label{sec-multistep}
 
-After determining the method with the lowest \gls{RMSE}, we attempted to improve it further in an attempt to solve the dataset balance issue, namely the high frequency of 0\% and 100\% fractions.
+As \gls{RF} regression performed the best in the regression model comparison, we attempted to improve it further in an attempt to solve the dataset balance issue, namely the high frequency of 0\% and 100\% fractions.
 As the dataset describes fractions of each land cover class at each point, most of the locations consist of a mix of only a few classes, and the fraction of the rest of the classes is zero at that location.
 If the pixel is pure, then one land cover class will be 100\% and the rest 0\%, which is also a common case.
 This leads to the dataset getting dominated by zeroes.
@@ -493,8 +493,8 @@ The boxplots are binned for each 10\% of the predictions.
 The 1:1 line indicates how well do the distributions of the predictions and the reference data match.
 We also created additional plots showing how \gls{RMSE}, \gls{MAE} and \gls{ME} change over these bins.
 
-Lastly, we produced spatial residuals, i.e. the overestimation and underestimation of each class fraction for each validation point.
-We rasterised the result into a map for ease of view.
+To show how the model accuracy varies in space, we produced spatial residuals, i.e. the overestimation and underestimation of each class fraction for each validation point.
+We rasterised the result into global maps for ease of view.
 If multiple points fell into the same raster cell, we reported the mean value.
 
 To put our results in a wider context, we compared them with the currently available global products for specific land cover classes.
@@ -513,7 +513,7 @@ Lastly, we investigated how features affect model accuracy. See \ref{sec-varimp}
 
 \subsection{Regression model accuracy comparison}
 
-Overall, \gls{RF} regression achieved the highest accuracy: by \gls{RMSE} when using a single model and a mean vote, and by \gls{MAE} when using a median vote.
+Overall, \gls{RF} regression achieved the highest accuracy: by \gls{RMSE} when using a single model and a mean vote (\gls{RMSE}: 17.3\%, \gls{MAE}: 9.4\%), and by \gls{MAE} when using a median vote (\gls{RMSE}: 20.7\%, MAE: 7.9\%).
 For more details about the results of the accuracy comparison between the tested regression models, see \ref{sec-model-comparison}.
 
 \subsection{Zero inflation adjustment with multi-step models and median voting}
@@ -521,7 +521,7 @@ For more details about the results of the accuracy comparison between the tested
 We investigated two ways to adjust for the issue of zero inflation in the training data.
 First, we used a median vote instead of a mean vote for ensembling decision tree votes in \gls{RF} regression, so as to predict exactly 0\% and 100\% more often.
 Second, we used our proposed multi-step model approach as detailed in section \ref{sec-multistep}.
-The overall results can be seen in table \ref{tab-accuracy}, whereas per-class results can be seen in figure \ref{fig-randomforest} and the relative statistics in \ref{sec-randomforest-relative}, figure \ref{fig-randomforest-relative}.
+The overall results can be seen in table \ref{tab-accuracy}, whereas per-class results can be seen in figure \ref{fig-randomforest} and the relative statistics in figure \ref{fig-randomforest-relative}.
 
 The median voting approach resulted in significantly more predictions of 0\% and 100\% class fractions, therefore the output looked closer to a discrete classification map compared to mean voting.
 Since these two most common values were predicted precisely much more often, \gls{MAE} reduced.
@@ -552,7 +552,7 @@ The purity binary classifier, when only 100\% cover is considered ``pure'', achi
 The classification model achieved 87\% overall accuracy, but shrub and built-up classes had very low users' accuracy.
 These classes are highly heterogeneous, therefore there were too few observations to train the classifier to identify these classes.
 Decreasing the purity threshold resulted in a lower overall accuracy, but an increase in the users' accuracy in the classifier model for these particular classes.
-The regression step by itself had lower accuracy than the combined three-step model, with 21.38 \gls{RMSE} and 10.49 \gls{MAE} (using median voting), as the middle of the range is the most difficult to predict correctly.
+The regression step by itself had lower accuracy than the combined three-step model, with 21.38\%~\gls{RMSE} and 10.49\%~\gls{MAE} (using median voting), as the middle of the range is the most difficult to predict correctly.
 Decreasing the purity threshold led to a lower \gls{RMSE}, as the value range of the regressor training data gets decreased, but a higher \gls{MAE}, as the amount of training data for the regressor decreased.
 Overall for the whole multi-step model, lowering the purity threshold increased \gls{RMSE} and slightly increased \gls{MAE} as well.
 
@@ -592,6 +592,13 @@ While it also increases \gls{RMSE}, combining the two concepts together leads to
     \label{fig-randomforest}
 \end{figure}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{article-figures/barplots/2020-11-02-rf-comparison-bar}
+    \caption{Comparison of relative accuracy metrics of RF regression models (equal proportion model shown as a reference). 1-step models use no adjustment for zero inflation, 2-step models perform classification on zeroes and regression for non-zeroes, 3-step models perform a classification into pure and non-pure pixels, and then a regression or classification based on that. Mean and median are the tree vote summary statistics.}
+    \label{fig-randomforest-relative}
+\end{figure}
+
 \subsection{Spatial predictions and accuracy}
 
 To visually demonstrate the predictions of the model with the highest accuracy by \gls{MAE}, we used the three-step median \gls{RF} model to predict land cover fractions at a global scale (100~m resolution, but sampled every 0.2~degrees).
@@ -621,7 +628,7 @@ As we can see from the box widths of the boxplots in figure \ref{fig-walltowall}
 The number of predictions was much more even across the entire range for herbaceous vegetation compared to shrubs.
 The model overestimated the fractions of trees and herbaceous cover, as the medians of each box are below the 1:1 line almost throughout the entire range, but it underestimated built-up and crop fractions.
 The overall \gls{ME} is below 0.001, which means that overall the model is not biased.
-For an alternative visualisation showing the change of \gls{RMSE}, \gls{MAE} and \gls{ME} overall and per class, see \ref{sec-apu}, figure \ref{fig-apu}.
+For an alternative visualisation showing the change of \gls{RMSE}, \gls{MAE} and \gls{ME} overall and per class over each prediction bin, see \ref{sec-apu}, figure \ref{fig-apu}.
 
 We also analysed the effect that the training features had on the model prediction, and found that features obtained from remote sensing were the most important, but all of the feature categories contributed to improving the model predictions.
 For more detailed information, see \ref{sec-varimp}.
@@ -711,7 +718,7 @@ Due to this effect, the resulting map is closer to a discrete classification map
 
 A similar effect was seen when using techniques such as median voting for \gls{RF} regression.
 Median voting also resulted in more correct 0\% fraction predictions, but likewise increased the chances of predicting 100\% of the wrong class.
-Our results showed that median voting has a stronger effect for reducing \gls{MAE} than the multi-step approach.
+Our results showed that median voting has a stronger effect in reducing \gls{MAE} than the multi-step approach.
 Therefore it may be a suitable choice in cases where it is computationally infeasible to train three models.
 However, when the median voting approach was combined with the three-step approach, the \gls{RMSE} decreased without affecting \gls{MAE}.
 Thus, three-step median \gls{RF} achieved the best combination that is optimised towards reducing \gls{MAE}, doing so without increasing \gls{RMSE} as much as the single-step median vote model does.
@@ -732,6 +739,7 @@ These products, that only focus on a single land cover class, had varying accura
 Some products, like \gls{GSW} water occurrence \citep{pekel_high-resolution_2016}, had a higher accuracy.
 Others, like \gls{GFCC} forest cover \citep{townshend_global_2017} and \gls{GHSL} built-up \citep{corbane_automated_2019}, had a lower accuracy.
 The accuracy of the impervious surface class fraction from \gls{FROM-GLC} mostly matches that of the built-up cover fraction of our proposed model.
+This shows that our proposed method, coupled with the large training dataset that we used, achieves similar and sometimes even better performance compared to specialised land cover fraction products, but brings the advantage of producing fractions for a variety of land cover classes that sum up to 100\%.
 
 The accuracies of other global products reported in literature likewise varied compared to our results.
 However, these comparisons are much more difficult to make, as the validation methods and scope vary significantly between the studies.
@@ -753,18 +761,19 @@ The three-step approach (or median vote) tilts the balance in the other directio
 But there may also be cases when the classifier predicts the wrong class.
 If the pixel is not pure, the regression step still tends to predict towards the mean due to the loss function, so the challenge of underestimating large fractions and overestimating small ones remains.
 However, with the multi-step approach, it is now possible to influence the decision process of the model to tweak it towards the desired outcome.
-In addition, using a median vote in tree-based ensemble models makes the model tend towards the median, which may still be one of the extreme values.
-In that case, the model typically overestimates or underestimates values for most of the value range, but on average is still not biased, as the predicted values are more polarised but balance each other out.
+In addition, using a median vote in tree-based ensemble models makes the model tend towards the median, which is often one of the extreme values.
+In that case, we see the inverse pattern compared to mean vote: small fractions are underestimated (i.e. predicted as 0\%), and large fractions are overestimated (i.e. predicted as 100\%).
+On average, the model is still not biased, as the predicted values are more polarised but balance each other out.
 The multi-step approach could be improved further by exploring the option of using different machine learning models for each step, and by gathering more features that would increase the accuracy of the models at each of the steps.
 
-There is another inherent challenge in land cover mapping for discerning classes that are related, e.g. herbaceous vegetation and shrubs.
+Another challenge inherent in land cover mapping is discerning classes that are related, e.g. herbaceous vegetation and shrubs.
 These classes were particularly difficult to map, in part due to their heterogeneity, and in part due to confusion between herbaceous vegetation, cropland and shrubs.
 As shown in \ref{sec-varimp}, figure \ref{fig-varimp}, specific types of features can be used to discriminate between these classes better.
 Specifically, the identification of herbaceous vegetation is primarily based on vegetation indices, identification of shrubs relies mostly on climate data, whereas cropland identification is more data-intensive and makes use of vegetation indices, temporal metrics, climate, soil and location information.
 These three classes are challenging to discriminate between not just for regression algorithms, but also for expert interpreters, which may lead to higher uncertainties also in the training and validation data for these classes.
 It is even more challenging to discern between these classes if they mix within the area of a single pixel, which is common in grasslands and shrublands, as well as in smallholder agriculture.
 The difference between the definition of trees, shrubs and herbaceous vegetation largely comes down to plant height, therefore dynamic information about vegetation height would allow mapping these classes more accurately.
-However, this would require either photogrammetry techniques (that typically rely on much finer spatial resolution and more overlap between the scenes) to reconstruct vegetation height, or the use of non-optical sensors such as \gls{SAR} interferometry.
+However, this would require either photogrammetry techniques (that typically rely on much finer spatial resolution and more overlap between the scenes) to reconstruct vegetation height, or the use of non-optical sensors such as \gls{SAR} interferometry or lidar data.
 Another way to differentiate between the vegetation classes could be to make use of hyperspectral data, which allows differentiation between different kinds of vegetation based on e.g. their photosynthesis processes or water content, which affect light absorption.
 Emerging new high level hyperspectral products, such as \gls{SIF} or \gls{GPP}, such as ones based on the upcoming FLEX satellite, could allow for a straightforward way to incorporate this extra information into land cover models.
 Hyperspectral data could be useful for better differentiation of non-vegetated classes as well, such as bare soil from urban, e.g. by separating the spectral signature of sand from concrete or asphalt.
@@ -801,12 +810,12 @@ The challenge here is that the higher uncertainty about fraction estimates may c
 
 \section{Conclusions}
 
-In this study, we compared multiple groups of algorithms for land cover fraction mapping.
-The best performing models were based on \gls{CART} tree ensembles, with \gls{RF} regression performing the best overall.
-A single-step \gls{RF} regression model using majority voting resulted in the best results for RMSE (17.3\%) and $R^2_{NSE}$ (0.66).
-In addition, we investigated ways to tackle the issue of accurately predicting the extreme fraction values of 0\% and 100\% by proposing a hierarchical multi-step approach combining classification and regression models.
-We compared and combined this approach with \gls{RF} median voting.
+We investigated ways to tackle the issue of accurately predicting the extreme fraction values of 0\% and 100\% by proposing a hierarchical multi-step approach combining classification and regression models.
+This approach was applied to an \gls{RF} regression model, which our tests showed to have the highest accuracy (RMSE: 17.3\%) for land cover fraction mapping compared to other regression algorithms.
+We also combined this approach with \gls{RF} median voting.
 The combined \gls{RF} median three-step approach obtained the best results for \gls{MAE} (7.9\%) and \gls{SCM} \gls{OA} (72±2\%).
+The proposed approach results in predictions of the most likely pure land cover class, when the class is uncertain.
+This is in contrast to predicting a mix of classes when a standard one-step model is used, and therefore is useful for users who are more interested in the most likely class, rather than class probabilities.
 Based on this model, we created a demonstration map showing the global distribution of land cover in separate land cover fraction layers.
 Remote sensing features were the most important for model accuracy, although all other types of features (climate, soil, terrain) also contributed significantly.
 
@@ -838,7 +847,7 @@ To test the performance of various regression models for land cover fraction map
 %\subsubsection{Linear models}
 
 First, we chose to compare five types of linear models, to have a baseline for a comparison with the nonlinear machine learning models.
-The most simple model we selected was the \glsentryfull{GLM}, also known as multivariate linear regression.
+The most simple model we selected was the \gls{GLM}, also known as multivariate linear regression.
 It is an extension to the standard linear regression that allows for multiple outcomes.
 Next, we tested two linear models that include input data regularisation in the model itself: lasso regression and \gls{PLS} regression.
 We also tested \glsentryfull{MLR}, which is usually used for classification and is fit using land cover class labels rather than fractions, but the output includes probabilities for each class that add up to 100\%.
@@ -921,46 +930,19 @@ As the ensembled methods are univariate, we used the binary relevance method in 
 \subsection{Comparison results and discussion}
 
 The overall accuracy statistics of the compared models are reported in table \ref{tab-accuracy-linear}, and per-class statistics in figure \ref{fig-models}.
-
 The results show that the $R^2$ statistics, especially $R^2_{NSE}$, are in agreement with the \gls{RMSE} statistics, and the \glsentryfull{OA} from the \glsentryfull{SCM} is in agreement with the \gls{MAE} statistics.
 $R^2$ is a representation of how closely the predictions correlate with the validation data, therefore big outliers have a large effect on the value.
 The \gls{SCM} does not take this into account, as it does a comparison on the overlap of fractions in each pixel, which doesn't apply an extra penalty for large errors.
 
 The baseline models that performed the best were the two tree-based machine learning models: \gls{RF} regression and Cubist.
 Both of these models are univariate, therefore predictions per class had to be made using the binary relevance method (one model per class).
-This shows that despite the limitations of the binary relevance method, namely that each model is only trained on the fractions of its own class and has no knowledge of the fractions of the other classes, and the need for a rescale step to make sure the fractions sum up to 100\%, the advantages of these machine learning models and the flexibility of fitting the models for each class outweigh the disadvantages of the binary relevance method.
+This shows that the disadvantages of the binary relevance method, namely that each model is only trained on the fractions of its own class and has no knowledge of the fractions of the other classes, and the need for a rescale step to make sure the fractions sum up to 100\%, are outweighed by the advantages of these machine learning models and the flexibility of training separate models for each class.
 
 The super learner method that combines both \gls{RF} regression and Cubist regression resulted in a model that is in between the two ensembled models in terms of accuracy.
 Its \gls{RMSE} was below that of Cubist regression, but above that of \gls{RF} regression.
-Conversely, the \gls{MAE} was below that of \gls{RF} regression (single model), but above that of Cubist regression.
+Conversely, the \gls{MAE} was below that of \gls{RF} regression, but above that of Cubist regression.
 This shows that the metalearner (another \gls{RF} model) could not differentiate between the two ensembled models well enough to select the model that is the most accurate for a given class.
 Rather, it weighted in both of the models' predictions, losing the advantages of the models when taken separately.
-
-The linear statistical models (\gls{GLM}, \gls{PLS}, Lasso regression and \gls{MLR}) performed the worst, as they are limited to a linear approach.
-The results of all of the linear models were very similar.
-There was no added value to \gls{PLS} and Lasso regressions over the basic \gls{GLM}.
-This is likely due to the additional preprocessing step of feature selection, as detailed in section \ref{sec-covariate-selection}.
-Lasso and \gls{PLS} regressions are extensions to \gls{GLM} that include a regularisation step, which proved to be unnecessary if all of the highly correlated features are already manually removed.
-
-\Gls{FNC} was the model that performed the worst out of the non-trivial models tested.
-This indicates that the shape of the feature data in feature space is too complex to capture merely with a centroid approach.
-This is further evidenced by a much better result obtained by the binary relevance \gls{SVM} model, which works on a similar principle but can capture more complex shapes.
-
-\Gls{MLP} \glspl{NN}, despite being a multivariate machine learning model, performed worse than all of the tested binary relevance methods.
-Nevertheless, it performed better than all of the multivariate linear models.
-
-%There was a trade-off between optimisation for \gls{MAE} and \gls{RMSE}, i.e. between penalising for large errors or not.
-%Models that had lower \gls{MAE} were more crisp, whereas models with lower \gls{RMSE} were more fuzzy.
-%Models that achieved lowest \gls{MAE}, in cases of high uncertainty tended to predict 100\% fractions more often, but risk predicting 100\% of the wrong class, whereas models with lowest \gls{RMSE} would predict a mix of all classes that could be within the pixel, thus more often making predictions that are partially but not completely incorrect.
-%Therefore models optimised for \gls{RMSE} are closer to a probabilistic view of land cover, whereas models optimised for \gls{MAE} are more representative of the best guess of the model for the most likely pure class of the pixel.
-
-All tested models had lower accuracy when estimating the cover fractions of vegetation classes (herbaceous, trees, crops, shrubs), compared to the non-vegetated land cover (inland water, built-up, bare land), as shown in figure \ref{fig-models}.
-This was exacerbated by the imbalance in class distribution: the built-up class is rare and very rarely forms a majority, therefore a prediction of 0\% leads to a perfect prediction most of the times, and even if it does not, the error is low.
-In contrast, tree cover had a lot more balanced distribution of fractions, including a large number of pure pixels, which leaves no such trivial solution.
-The \gls{RRMSE} and \gls{RMAE} statistics show this (see figure \ref{fig-models-relative}): the tree cover prediction has low relative error given its high mean value (32\%), whereas the built-up class is the most challenging to predict according to \gls{RRMSE} given its low mean value (3\%).
-The shrub cover fraction is also very challenging to predict, since it had the highest \gls{RMAE} and none of the models showed large improvements in \gls{RMSE} compared to the equal proportions model.
-There were only moderate improvements for predicting the herbaceous vegetation fraction as well.
-In contrast, most models were a significant improvement in predicting tree, built-up, water and bare cover fractions compared to the equal proportion model, indicating that the features used to train the models were useful to distinguish these classes from the others and to quantify their proportions in each pixel.
 
 \begin{table}
 \centering
@@ -998,19 +980,38 @@ Cubist + RF ensemble
 \end{table}
 
 \begin{figure}
-    \includegraphics[width=\textwidth]{article-figures/barplots/2020-06-03-model-comparison-bar}
+    \includegraphics[width=0.85\textwidth]{article-figures/barplots/2020-06-03-model-comparison-bar}
     \caption{Comparison of absolute \gls{RMSE} (top) and absolute \gls{MAE} (bottom) per class of the best performing models in their category, and the equal proportions solution as a reference.}
     \label{fig-models}
 \end{figure}
 
-\begin{figure}
-    \includegraphics[width=\textwidth]{article-figures/barplots/2020-11-02-model-comparison-bar}
-    \caption{Comparison of relative RMSE (top) and relative MAE (bottom) per class of the best performing models in their category, and the equal proportions solution as a reference.}
-    \label{fig-models-relative}
-\end{figure}
+The linear statistical models (\gls{GLM}, \gls{PLS}, Lasso regression and \gls{MLR}) performed the worst, as they are limited to a linear approach.
+The results of all of the linear models were very similar.
+There was no added value to \gls{PLS} and Lasso regressions over the basic \gls{GLM}.
+This is likely due to the additional preprocessing step of feature selection, as detailed in section \ref{sec-covariate-selection}.
+Lasso and \gls{PLS} regressions are extensions to \gls{GLM} that include a regularisation step, which proved to be unnecessary if all of the highly correlated features are already manually removed.
 
-In this study, we have tested a number of methods for characterising land cover by means of predicting thematically comprehensive land cover fractions at the global scale.
-We found that of the methods that we tested, without additional measures to take the data imbalance into account, \gls{RF} regression and Cubist regression produce output of the highest accuracy by \gls{RMSE} and \gls{MAE}, respectively.
+\Gls{FNC} was the model that performed the worst out of the non-trivial models tested.
+This indicates that the shape of the feature data in feature space is too complex to capture merely with a centroid approach.
+This is further evidenced by a much better result obtained by the binary relevance \gls{SVM} model, which works on a similar principle but can capture more complex shapes.
+
+\Gls{MLP} \glspl{NN}, despite being a multivariate machine learning model, performed worse than all of the tested binary relevance methods.
+Nevertheless, it performed better than all of the multivariate linear models.
+
+%There was a trade-off between optimisation for \gls{MAE} and \gls{RMSE}, i.e. between penalising for large errors or not.
+%Models that had lower \gls{MAE} were more crisp, whereas models with lower \gls{RMSE} were more fuzzy.
+%Models that achieved lowest \gls{MAE}, in cases of high uncertainty tended to predict 100\% fractions more often, but risk predicting 100\% of the wrong class, whereas models with lowest \gls{RMSE} would predict a mix of all classes that could be within the pixel, thus more often making predictions that are partially but not completely incorrect.
+%Therefore models optimised for \gls{RMSE} are closer to a probabilistic view of land cover, whereas models optimised for \gls{MAE} are more representative of the best guess of the model for the most likely pure class of the pixel.
+
+All tested models had lower accuracy when estimating the cover fractions of vegetation classes (herbaceous, trees, crops, shrubs), compared to the non-vegetated land cover (inland water, built-up, bare land), as shown in figure \ref{fig-models}.
+This was exacerbated by the imbalance in class distribution: the built-up class is rare and very rarely forms a majority, therefore a prediction of 0\% leads to a perfect prediction most of the times, and even if it does not, the error is low.
+In contrast, tree cover had a lot more balanced distribution of fractions, including a large number of pure pixels, which leaves no such trivial solution.
+The \gls{RRMSE} and \gls{RMAE} statistics show this (see figure \ref{fig-models-relative}): the tree cover prediction has low relative error given its high mean value (32\%), whereas the built-up class is the most challenging to predict according to \gls{RRMSE} given its low mean value (3\%).
+The shrub cover fraction is also very challenging to predict, since it had the highest \gls{RMAE} and none of the models showed large improvements in \gls{RMSE} compared to the equal proportions model.
+There were only moderate improvements in the prediction of the herbaceous vegetation fraction as well.
+In contrast, most models were a significant improvement in predicting tree, built-up, water and bare cover fractions compared to the equal proportion model, indicating that the features used to train the models were useful to distinguish these classes from the others and to quantify their proportions in each pixel.
+
+To sum up, we tested a number of regression methods for characterising land cover by means of predicting thematically comprehensive land cover fractions at the global scale, and found that \gls{RF} regression and Cubist regression produce output of the highest accuracy by \gls{RMSE} and \gls{MAE}, respectively.
 Our findings agree with those of \citet{li_monitoring_2018}, who compared Cubist and \gls{RF} regression for water fraction classification and found that Cubist performs slightly better than \gls{RF} regression for this particular class.
 Their Cubist regression result achieved 7.52\% \gls{MAE} and 10.39\% \gls{RMSE}.
 Our respective results using Cubist regression were 2.57\% \gls{MAE} and 11.51\% \gls{RMSE}.
@@ -1018,40 +1019,39 @@ While Cubist works best for the inland water class, when considering all of the 
 The difference in the reported numbers may be due to the differences in scale (regional vs global) and training data balance.
 As we focused on predicting multiple classes, our training dataset intrinsically had higher zero inflation.
 
-At a local scale, \citet{walton2008subpixelrf} assessed the accuracy of machine learning algorithms for urban land cover fraction mapping and indicated 14.5\% \gls{MAE} and 20.0\% \gls{RMSE} for Cubist, which he also noted as performing better than \gls{RF} regression and \glspl{SVM}.
-Our results were 9.70\% \gls{RMSE} and 2.43\% \gls{MAE} for Cubist over the built-up class, and we also noted that Cubist performed slightly better than the other two algorithms for this class.
-Both \citet{okujeni_comparison_2014} and \citet{foody1997fuzzynnet} also performed land cover fraction mapping over an urban area.
-The results of \citet{okujeni_comparison_2014} indicated that \gls{SVM} regression performed better than \gls{RF} regression.
-This could be due to much finer spatial resolution (3.6–9 m) data used in their study, and the associated difference in class definitions.
-\citet{foody1997fuzzynnet} reported an \gls{RMSE} of 16.6\% using \gls{MLP} \glspl{NN}, lower than our results (22.7\%).
-The differences in the absolute numbers of \gls{RMSE} and \gls{MAE} between these studies and ours are most likely due to the different scope, namely their focus on fine scale predictions over a local area for the urban class in particular, in contrast to our global focus with comprehensive classes, leading to a different balance of the datasets between the studies.
+\begin{figure}
+    \includegraphics[width=0.85\textwidth]{article-figures/barplots/2020-11-02-model-comparison-bar}
+    \caption{Comparison of relative RMSE (top) and relative MAE (bottom) per class of the best performing models in their category, and the equal proportions solution as a reference.}
+    \label{fig-models-relative}
+\end{figure}
 
-In this study, model optimisation and dataset sizes were also a challenge.
-Each model may have multiple parameters that can be tuned, and the input to each method can also be modified (e.g. by log-transforming features or replacing missing values).
-Since the large dataset size increases the training time for the models, parameters to tune have to be chosen carefully.
-As such, it is possible to miss a particular parameter combination that may further improve the results.
-On the other hand, our results showed that the differences between the best performing methods are not very high.
-The differences in model parametrisations are expected to be even lower.
+%At a local scale, \citet{walton2008subpixelrf} assessed the accuracy of machine learning algorithms for urban land cover fraction mapping and indicated 14.5\% \gls{MAE} and 20.0\% \gls{RMSE} for Cubist, which he also noted as performing better than \gls{RF} regression and \glspl{SVM}.
+%Our results were 9.70\% \gls{RMSE} and 2.43\% \gls{MAE} for Cubist over the built-up class, and we also noted that Cubist performed slightly better than the other two algorithms for this class.
+%Both \citet{okujeni_comparison_2014} and \citet{foody1997fuzzynnet} also performed land cover fraction mapping over an urban area.
+%The results of \citet{okujeni_comparison_2014} indicated that \gls{SVM} regression performed better than \gls{RF} regression.
+%This could be due to much finer spatial resolution (3.6–9 m) data used in their study, and the associated difference in class definitions.
+%\citet{foody1997fuzzynnet} reported an \gls{RMSE} of 16.6\% using \gls{MLP} \glspl{NN}, lower than our results (22.7\%).
+%The differences in the absolute numbers of \gls{RMSE} and \gls{MAE} between these studies and ours are most likely due to the different scope, namely their focus on fine scale predictions over a local area for the urban class in particular, in contrast to our global focus with comprehensive classes, leading to a different balance of the datasets between the studies.
 
-Another challenging aspect about land cover fraction mapping is the available algorithms that would suit this use case.
-In its core, it is a multivariate regression problem, but most regression algorithms are univariate.
-Our results showed that the binary relevance method works well to facilitate the use of univariate regression methods for this task, as the highest accuracy was achieved by algorithms that used the binary relevance method.
-This further expands the field of possible algorithms that could be used.
+%In this study, model optimisation and dataset sizes were also a challenge.
+%Each model may have multiple parameters that can be tuned, and the input to each method can also be modified (e.g. by log-transforming features or replacing missing values).
+%Since the large dataset size increases the training time for the models, parameters to tune have to be chosen carefully.
+%As such, it is possible to miss a particular parameter combination that may further improve the results.
+%On the other hand, our results showed that the differences between the best performing methods are not very high.
+%The differences in model parametrisations are expected to be even lower.
+
+%Another challenging aspect about land cover fraction mapping is the available algorithms that would suit this use case.
+%In its core, it is a multivariate regression problem, but most regression algorithms are univariate.
+Our results showed that the binary relevance method works well to facilitate the use of univariate regression methods for the global land cover fraction mapping task, as the highest accuracy was achieved by algorithms that used the binary relevance method.
+This further expands the field of possible algorithms that could be used for the task.
 In addition, both the binary relevance method and the multi-step method can accept different algorithms for its submodels, i.e. for different classes in the case of binary relevance and for different steps in the case of the multi-step approach.
 There may be a combination of models that would work even better than the models we tested.
 We could not cover the entire range of methods in the scope of this study, therefore there is still room for improvement.
 For example, classical spectral unmixing methods, such as spectral mixture analysis, has been often used in the past (e.g. in \citet{adams_classification_1995}).
-However, due to the limitations of the spectral mixture analysis methods \citep{somers_endmember_2011}, we could not use it with the features we selected (as listed in \ref{sec-inputdata}, table \ref{tab-inputdata}), as they do not form a linear mixture representing the land cover fractions.
-Modern machine learning methods are advantageous for their ability to model complex nonlinear relationships between variables and thus make use of all of the features as shown in \ref{sec-varimp}, figure \ref{fig-varimp}.
-
-\section{Multi-step model relative error comparison} \label{sec-randomforest-relative}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=\textwidth]{article-figures/barplots/2020-11-02-rf-comparison-bar}
-    \caption{Comparison of relative accuracy metrics of RF regression models (equal proportion model shown as a reference). 1-step models use no adjustment for zero inflation, 2-step models perform classification on zeroes and regression for non-zeroes, 3-step models perform a classification into pure and non-pure pixels, and then a regression or classification based on that. Mean and median are the tree vote summary statistics.}
-    \label{fig-randomforest-relative}
-\end{figure}
+However, due to the limitations of the spectral mixture analysis methods \citep{somers_endmember_2011}, we could not use it with the features we selected, as they do not form a linear mixture representing the land cover fractions.
+%(as listed in \ref{sec-inputdata}, table \ref{tab-inputdata})
+Modern machine learning methods are advantageous for their ability to model complex nonlinear relationships between variables and thus make use of all of the features.
+%as shown in \ref{sec-varimp}, figure \ref{fig-varimp}.
 
 \section{Model accuracy changes per predicted fraction} \label{sec-apu}
 
@@ -1064,32 +1064,32 @@ Modern machine learning methods are advantageous for their ability to model comp
 
 \section{Feature importance} \label{sec-varimp}
 
-In addition to classification methods, one aspect that is important for classification accuracy is the data (features) that the algorithm is trained on and predict land cover from \citep{yu2014metadiscoveries}.
-In addition to optical features (such as spectral bands), temporal features (growing season start, duration, growing intensity) are commonly used to improve the separability of vegetation, such as crop types \citep{jakubauskas2001harmonic}.
-\Glspl{VI} condense data and reduce the noise inherent in single bands, and thus are commonly used to improve land cover class separability, e.g. for wetlands \citep{sader1995wetlands}, as well as for defining classification rules in rule-based fuzzy classification \citep{baraldi2006rulebased}.
-Elevation features (elevation, slope, aspect) are also known to improve the separability between classes, such as trees \citep{burrough2001fuzzy}.
+%In addition to classification methods, one aspect that is important for classification accuracy is the data (features) that the algorithm is trained on and predict land cover from \citep{yu2014metadiscoveries}.
+%In addition to optical features (such as spectral bands), temporal features (growing season start, duration, growing intensity) are commonly used to improve the separability of vegetation, such as crop types \citep{jakubauskas2001harmonic}.
+%\Glspl{VI} condense data and reduce the noise inherent in single bands, and thus are commonly used to improve land cover class separability, e.g. for wetlands \citep{sader1995wetlands}, as well as for defining classification rules in rule-based fuzzy classification \citep{baraldi2006rulebased}.
+%Elevation features (elevation, slope, aspect) are also known to improve the separability between classes, such as trees \citep{burrough2001fuzzy}.
 %In this paper, we also used such features for increasing the accuracy of land cover fraction regression model predictions.
 %, and their importance for the predictions was analysed.
 
-To calculate feature importance, we performed permutation importance on the model that had the lowest \gls{MAE}.
-We shuffled the values of each feature in turn, and the models made predictions based on all of the features, including the shuffled one.
+To gain insight on what features drive the \gls{RF} three-step median model, we performed permutation importance on it:
+we shuffled the values of each feature in turn, and the model made predictions based on all of the features, including the shuffled one.
 This results in a decrease in the accuracy of predictions, as the feature in question no longer contains meaningful information.
 We then recorded the resulting increase in \gls{MAE} compared to the validation set as a measure of feature importance, both per class and overall for all classes combined.
-
-We performed \Gls{RF} permutation importance on the three-step median model to test which features were important for \gls{RF} predictions.
+%
+%We performed \Gls{RF} permutation importance on the three-step median model to test which features were important for \gls{RF} predictions.
 The results are shown in figure \ref{fig-varimp}.
 
 \begin{figure}
     \centering
-    \includegraphics[width=14cm]{article-figures/heatmaps/2020-11-06-varimp-heatmap-top5}
+    \includegraphics[width=11cm]{article-figures/heatmaps/2020-11-06-varimp-heatmap-top5}
     \caption{Random Forest three-step median approach variable importance, top 5 features per category. Categories are ordered by cumulative importance. The values represent increase in MAE for the given class when the given feature is permuted.}
     \label{fig-varimp}
 \end{figure}
 
 The overall most important variables were the maximum and minimum \gls{NDVI} over the whole time series of PROBA-V imagery.
 They were followed by the median \gls{NIRv} and \gls{NDMI} over the whole time series.
-The importance of remote sensing information can also be seen from the accuracy statistics of a single-step \gls{RF} regression model, when only vegetation index and temporal features were input into the model (see table \ref{tab-accuracy}, ``only RS features'').
-After excluding all the static features, \gls{RMSE} and \gls{MAE} increased only by around 1 percentage point.
+The importance of remote sensing information can also be seen from the accuracy statistics of a single-step \gls{RF} regression model, when only vegetation index and temporal features were input into the model (see table \ref{tab-accuracy}, ``only RS features''):
+\gls{RMSE} and \gls{MAE} increased only by around 1 percentage point.
 
 The remote sensing data was of lower importance (and sometimes even confounding) only for the shrub class.
 This class is complicated to distinguish from other natural vegetation, and thus when trying to predict shrub cover fractions, the model benefited from a wide variety of additional features, including location and climate information.
@@ -1121,14 +1121,15 @@ The result that including more training features is beneficial, but remote sensi
 Remote sensing data is also unique in that it forms a time series, which enables us to both calculate additional temporal metrics and to monitor land cover change over time.
 In addition to remote sensing data, \citet{hengl_soilgrids250m_2017} also noted high importance of climate data, however, it is focused on soils, whereas climate has more effect on long-term processes such as soil formation than on land cover.
 Climate data was the second most important in our case, mostly for the crop fraction estimation, which is also closely linked with soils.
-Note that the feature importance may be different at different scales, e.g. if predictions are made at a finer spatial resolution, such as 30~m or 10~m.
+%Note that the feature importance may be different at different scales, e.g. if predictions are made at a finer spatial resolution, such as 30~m or 10~m.
 
-The scale of the study poses performance challenges, as features that the models use need to be available at a global scale.
-Our results showed that all of the feature groups used in the study were useful, therefore leaving a feature out means sacrificing some predictive power.
-The gain would be less time needed for processing, as that feature would no longer need to be downloaded, preprocessed and processed.
+%The scale of the study poses performance challenges, as features that the models use need to be available at a global scale.
+The feature importance results showed that all of the feature groups used in the study were useful, therefore leaving a feature out means sacrificing some predictive power.
+On the other hand, leaving out some features would be beneficial in that less time would be needed for processing, as that feature would no longer need to be downloaded, preprocessed and processed.
+This is an important consideration, given that for global land cover mapping, all features need to be available for the whole globe as well.
 In addition, model training performance (time for training and memory usage) may be an important consideration for global land cover mapping, as it may limit the scope of what models may be used for this task.
 For example, ensemble learning techniques like the super learner are very resource-intensive and may take weeks to train.
-Therefore it is important to take into account not just the model accuracy, but also whether the improvement of the accuracy is worth the increase in processing time or computing resource usage.
+Therefore for operational land cover product creation purposes, it is important to take into account not just the model accuracy, but also whether the improvement of the accuracy is worth the increase in processing time or computing resource usage.
 
 \newpage
 
