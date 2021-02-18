@@ -131,14 +131,15 @@
 \begin{abstract} % elsarticle: environment instead of a command \abstract{
 Currently most global land cover maps are produced with discrete classes, which express the dominant land cover class in each pixel, or a combination of several classes at a predetermined ratio. In contrast, land cover fraction mapping enables expressing the proportion of each pure class in each pixel, which increases precision and reduces legend complexity. To map land cover fractions, regression rather than classification algorithms are needed, and multiple approaches are available for this task.
 
-A major challenge for land cover fraction mapping models is data sparsity: the dataset is zero-inflated due to how common the 0\% fraction is, but as regression favours the mean, 0\% and 100\% fractions are difficult to predict accurately. We proposed a new solution by combining three models: a binary model determines whether a pixel is pure; if so, it is processed using a classification model; otherwise with a regression model.
+A major challenge for land cover fraction mapping models is data sparsity. Land cover fraction data is by its nature zero-inflated due to how common the 0\% fraction is. As regression favours the mean, 0\% and 100\% fractions are difficult for regression models to predict accurately. We proposed a new solution by combining three models: a binary model determines whether a pixel is pure; if so, it is processed using a classification model; otherwise with a regression model.
 
-We compared the performance of multiple types of linear and machine learning regression algorithms for land cover fraction mapping, and for our proposed three-step model, assessed the importance of six categories of features, evaluated the spatial and per-class accuracy, and demonstrated a wall-to-wall prediction of seven land cover fractions over the globe.
+We compared multiple regression algorithms and implemented our proposed three-step model on the algorithm with the lowest RMSE.
+We further evaluated the spatial and per-class accuracy of the model and demonstrated a wall-to-wall prediction of seven land cover fractions over the globe. 
 The models were trained on over 138\,000 points and validated on a separate dataset of over 20\,000 points, provided by the \gls{CGLS-LC100} project. Both datasets are global and aligned with the PROBA-V 100 m UTM grid.
 
-Results showed that the random forest regression model reached the lowest RMSE of 17.3\%. Lowest MAE (7.9\%) and highest overall accuracy (72±2\%) was achieved using random forest regression with our proposed three-model approach and median vote. This model was driven primarily by optical remote sensing data.
+Results showed that the random forest regression model reached the lowest RMSE of 17.3\%. Lowest MAE (7.9\%) and highest overall accuracy (72±2\%) was achieved using random forest regression with our proposed three-model approach and median vote.
 
-This research proves that machine learning algorithms can be applied globally to map a wide variety of land cover fractions, and tuned for user needs. Fraction mapping expresses land cover more precisely, and empowers users to create their own discrete maps using user-defined thresholds and rules, which enables customising the result for a diverse range of uses. The three-step approach enables mapping 0\% and 100\% fractions more accurately, and thus has already been taken up in the operational production of global land cover fraction layers within the \gls{CGLS-LC100} project. This study also includes an accuracy assessment of land cover fraction maps both thematically and spatially, which could be taken up by future land cover fraction mapping efforts.
+This research proves that machine learning algorithms can be applied globally to map a wide variety of land cover fractions. Fraction mapping expresses land cover more precisely, and empowers users to create their own discrete maps using user-defined thresholds and rules, which enables customising the result for a diverse range of uses. The three-step approach is useful for addressing the zero-inflation issue and mapping 0\% and 100\% fractions more accurately, and thus has already been taken up in the operational production of global land cover fraction layers within the \gls{CGLS-LC100} project. Furthermore, this study contributes to the accuracy assessment of land cover fraction maps both thematically and spatially, and these methods could be taken up by future land cover fraction mapping efforts.
 \end{abstract}
 
 \begin{keyword}
@@ -157,7 +158,7 @@ Land cover, as one of the key variables for monitoring a number of \glspl{SDG}, 
 In this context, the capacity for land monitoring has increased, and new global land cover maps have emerged to better map the current land cover of the world, as well as to track land cover change.
 Some of the recent achievements have been the \ac{LC-CCI} product \citep{esa_land_2017} that provides a long-term set of consistent global annual medium-resolution land cover maps aimed at the climate community, \glsentryfull{CGLS-LC100} product \citep{buchhorn_moderate_2019, buchhorn_copernicus_2020} that provides a finer spatial resolution and higher quality with yearly updates since 2015, and the \ac{FROM-GLC} product \citep{fromglc2019} that showcases the potential of land cover mapping at 10 m resolution.
 
-Except for the cover fraction layers of the \ac{CGLS-LC100} product, all other global land cover products that include all major land cover classes, such as the ones described by \citet{bartholome2005glc2000, friedl2010modis, arino2007globcover, see2015hybrid, chen2015globeland30}, are provided with discrete classes (also known as ``hard'' or ``crisp'' classification), where each pixel of the map can only represent a single land cover class.
+Except for the cover fraction layers of the \ac{CGLS-LC100} product, all other global land cover products that include major land cover classes, such as the ones described by \citet{bartholome2005glc2000, friedl2010modis, arino2007globcover, see2015hybrid, chen2015globeland30}, are provided with discrete classes (also known as ``hard'' or ``crisp'' classification), where each pixel of the map can only represent a single land cover class.
 Such discrete classification oversimplifies reality, as mixed pixels that are covered by multiple land cover classes are a common occurrence. 
 This issue is exacerbated at coarse resolutions and over heterogeneous landscapes.
 It may result in biases, for instance, a sparse forest may be classified as grassland, ignoring the relatively few trees in the area, and thus underestimate tree cover in the pixel.
@@ -178,20 +179,19 @@ To date, only \ac{CGLS-LC100} \citep{marcel_buchhorn_copernicus_2019} provides g
 Land cover fraction mapping can be performed using a variety of different approaches and algorithms.
 In its core, it is a regression rather than a classification problem, as the output is a fraction of a label rather than a label itself.
 Methods that have been tested in previous studies include fuzzy nearest centroid regression \citep{zhang2001fullyfuzzy}, \ac{SMA} (e.g. \citealp{shimabukuro1991least, adams_classification_1995, hobbs2003linear, yang_landsat_2012}), \ac{RF} regression (e.g. \citealp{walton2008subpixelrf}), \gls{SVM} regression \citep{walton2008subpixelrf}, Cubist regression \citep{walton2008subpixelrf}, \gls{MLP} \glspl{NN} \citep{zhang2001fullyfuzzy}, genetic algorithms \citep{stavrakoudis_boosted_2011} and wavelet transformation \citep{uma_shankar_wavelet-fuzzy_2011}.
-The previous studies have only compared a few of these methods at once, and never with a thematically complete set of land cover classes nor at global scale.
+The previous studies have only used or compared a few of these methods at once, and never with a thematically complete set of land cover classes nor at global scale.
 
 A common issue with the use of land cover fraction data as input into regression models is data imbalance.
-The more classes are mapped, the more more likely it is that one or more classes are not present in a given pixel (have a 0\% fraction), leading to zero inflation.
+The more classes are mapped, the more likely it is that one or more classes are not present in a given pixel (have a 0\% fraction), leading to zero inflation.
 This is especially the case in homogeneous areas, where we can find not only an inflation of 0\% fractions, but also an inflation in 100\% fractions.
-This leaves little data in the middle for the regression models to learn from.
+This data imbalance leaves little training data in the middle for the regression models to learn from.
 Conversely, regression models tend to favour predictions closer to the mean and rarely predict extreme values.
 In this study, we propose the use of a hierarchical multi-step modelling approach to better predict these extreme values.
 
-Lastly, model accuracy assessment by itself is often challenging, especially at a global scale.
+Model accuracy assessment by itself is often challenging, especially at a global scale.
 It requires a comprehensive dataset across the globe that would be comparable with the training data, and yet independent of it.
 Accuracy assessment of land cover fractions is even more challenging, as it requires a dataset that either provides fraction information, or fine spatial resolution data from which it can be calculated.
-Because of these challenges, the information about the accuracy of the existing global land cover fraction products is often limited.
-This makes it difficult for the users to decide whether a given product suits their needs.
+Because of these challenges, the information about the accuracy of the existing global land cover fraction products is often limited, which makes it difficult for the users to decide whether a given product suits their needs.
 Users would also benefit from knowing the spatial variation of accuracy, as models may be more accurate at certain locations of the world and less so at others.
 
 %In this study, we made use of a validation dataset that was collected independently from the training dataset, as part of the \gls{CGLS-LC100} project \citep{nandin-erdene_tsendbazar_copernicus_2019}.
@@ -199,7 +199,7 @@ Users would also benefit from knowing the spatial variation of accuracy, as mode
 %The validation data was collected at \gls{WUR}, whereas the training data was collected at \gls{IIASA}, ensuring independence of the datasets.
 %We used the validation data to assess model accuracy both thematically and spatially.
 
-In this study, after investigating and comparing a variety of methods for performing global land cover fraction mapping, we proposed a method to enhance land cover fraction mapping by dealing with the inherent data imbalance issue.
+In this study, after investigating and comparing a variety of methods for global land cover fraction mapping, we proposed an approach to enhance land cover fraction mapping by dealing with the inherent data imbalance issue.
 We assessed the accuracy of the result both thematically and spatially, by calculating model accuracy spatially across the globe.
 Lastly, we investigated the effect of input features on each mapped class fraction.
 Therefore the primary objectives of our study were to:
@@ -424,10 +424,10 @@ For more technical details and in-depth results of the regression model accuracy
     \label{tab-methods}
 \end{table}
 
-\subsection{Multi-step approach to account for value imbalance}
+\subsection{Multi-step approach to account for zero inflation}
 \label{sec-multistep}
 
-As \gls{RF} regression performed the best in the regression model comparison, we attempted to improve it further in an attempt to solve the dataset balance issue, namely the high frequency of 0\% and 100\% fractions.
+As \gls{RF} regression performed the best by \gls{RMSE} in the regression model comparison, we tested whether it could be improved further by attempting to solve the training dataset balance issue, namely the high frequency of 0\% and 100\% fractions.
 As the dataset describes fractions of each land cover class at each point, most of the locations consist of a mix of only a few classes, and the fraction of the rest of the classes is zero at that location.
 If the pixel is pure, then one land cover class will be 100\% and the rest 0\%, which is also a common case.
 This leads to the dataset getting dominated by zeroes.
@@ -436,7 +436,7 @@ This is not desirable for users of land cover fraction data, as the added value 
 Conversely, 0\% by itself is rarely predicted precisely, because when the value is uncertain, predictions tend towards the mean.
 Therefore we tried several approaches to deal with data imbalance by employing a hierarchical combination of machine learning models.
 
-Taking the algorithm with the lowest \gls{RMSE}, we compared three approaches.
+We compared three approaches using \gls{RF} models:
 (a): a single regression model trained on all data.
 (b): a two-model approach in two steps.
 Step 1: a binary classification model for each class to predict zeroes, trained on a generated dataset that, based on the land cover fraction values, had labels ``zero'' and ``non-zero''.
@@ -511,17 +511,14 @@ Lastly, we investigated how features affect model accuracy. See \ref{sec-varimp}
 
 \section{Results}
 
-\subsection{Regression model accuracy comparison}
-
-Overall, \gls{RF} regression achieved the highest accuracy: by \gls{RMSE} when using a single model and a mean vote (\gls{RMSE}: 17.3\%, \gls{MAE}: 9.4\%), and by \gls{MAE} when using a median vote (\gls{RMSE}: 20.7\%, MAE: 7.9\%).
-For more details about the results of the accuracy comparison between the tested regression models, see \ref{sec-model-comparison}.
-
 \subsection{Zero inflation adjustment with multi-step models and median voting}
 
-We investigated two ways to adjust for the issue of zero inflation in the training data.
-First, we used a median vote instead of a mean vote for ensembling decision tree votes in \gls{RF} regression, so as to predict exactly 0\% and 100\% more often.
-Second, we used our proposed multi-step model approach as detailed in section \ref{sec-multistep}.
-The overall results can be seen in table \ref{tab-accuracy}, whereas per-class results can be seen in figure \ref{fig-randomforest} and the relative statistics in figure \ref{fig-randomforest-relative}.
+Regression model comparison showed that \gls{RF} regression achieved the highest accuracy: by \gls{RMSE} when using a single model and a mean vote (\gls{RMSE}: 17.3\%, \gls{MAE}: 9.4\%), and by \gls{MAE} when using a median vote (\gls{RMSE}: 20.7\%, MAE: 7.9\%).
+Therefore we chose \gls{RF} regression to test our proposed multi-step approach.
+For more details about the results of the accuracy comparison between the tested regression models, see \ref{sec-model-comparison}.
+
+The overall accuracy statistics of all of the \gls{RF} regression models that we tested, including two-step, three-step, as well as median voting approaches and their combinations, can be seen in table \ref{tab-accuracy}.
+Per-class results can be seen in figure \ref{fig-randomforest} and the relative statistics in figure \ref{fig-randomforest-relative}.
 
 The median voting approach resulted in significantly more predictions of 0\% and 100\% class fractions, therefore the output looked closer to a discrete classification map compared to mean voting.
 Since these two most common values were predicted precisely much more often, \gls{MAE} reduced.
@@ -532,8 +529,7 @@ Therefore the overall effect of using the median vote is a change in the balance
 We observed a similar effect when using the multi-step approach for an \gls{RF} regression that uses the mean statistic for ensembling the tree votes.
 Using a two-step approach decreased the \gls{MAE} of the model, while increasing \gls{RMSE}.
 This is because the false positives in the first step of the two-step model (the binary zero/non-zero classification) result in some high fractions nevertheless being predicted as zero.
-The two-step approach combined with binary relevance also introduced a drawback in that there were cases where all land cover class fractions were predicted to be 0\% in the first step.
-In such cases it was not possible to determine the land cover fractions.
+The two-step approach combined with binary relevance also had a drawback: in some cases all land cover class fractions were predicted to be 0\% in the first step, making it impossible to determine the land cover fractions.
 Therefore, to make them sum up to 100\%, we set these cases to equal proportions ($100\% / 7$), which introduced further error.
 
 The three-step approach solved this issue, since the first step predicts purity, rather than zeroes.
@@ -601,12 +597,18 @@ While it also increases \gls{RMSE}, combining the two concepts together leads to
 
 \subsection{Spatial predictions and accuracy}
 
-To visually demonstrate the predictions of the model with the highest accuracy by \gls{MAE}, we used the three-step median \gls{RF} model to predict land cover fractions at a global scale (100~m resolution, but sampled every 0.2~degrees).
+We selected the three-step median vote \gls{RF} model for further analysis, as it represents a good balance between the \gls{RMSE} and \gls{MAE} statistics, and its analysis helps further understand the three-step model.
+To visually demonstrate the model, we used it to predict land cover fractions at a global scale (100~m resolution, but sampled every 0.2~degrees).
 See figure \ref{fig-walltowall} for a visualisation of all of the fraction layers separately, and the supplementary material for the output GeoTIFF file itself.
 The wall-to-wall fraction maps reveal how land cover fraction mapping is capable of expressing gradients and mixed land cover.
+In addition, the spatial accuracy maps that we produced based on the model predictions show the variation in the model accuracy globally, and are also presented in raster format in figure \ref{fig-walltowall}.
 
-In addition, to examine whether there were any patterns in the accuracy of the predictions globally, we produced spatial accuracy maps based on the predictions in locations where we had independent validation data.
-This is also presented in raster format in figure \ref{fig-walltowall}.
+\begin{sidewaysfigure}
+    \centering
+    \includegraphics[width=\textwidth]{article-figures/maps/2020-10-12-walltowall.png}
+    \caption{Random Forest single model predictions per class. Top row: predicted fractions, each given its own colour (``Overall'' shows a hardened map of dominant land cover using the same colour scheme). Middle row: absolute errors per class, based on predictions at point locations of validation data, displayed aggregated over 1 by 1 degree cells using the mean function. Bottom row: distribution of predicted versus true values, shown as box plots with bins each 10\%, widths representing sample size.}
+    \label{fig-walltowall}
+\end{sidewaysfigure}
 
 Biotic gradients can be seen in the global patterns of the land cover fractions.
 For instance, gradients are visible between communities dominated by shrubs and ones dominated by herbaceous vegetation, such as in south and east Africa.
@@ -630,20 +632,12 @@ The model overestimated the fractions of trees and herbaceous cover, as the medi
 The overall \gls{ME} is below 0.001, which means that overall the model is not biased.
 For an alternative visualisation showing the change of \gls{RMSE}, \gls{MAE} and \gls{ME} overall and per class over each prediction bin, see \ref{sec-apu}, figure \ref{fig-apu}.
 
-We also analysed the effect that the training features had on the model prediction, and found that features obtained from remote sensing were the most important, but all of the feature categories contributed to improving the model predictions.
+Our analysis of the effect of training features on model prediction accuracy showed that features obtained from remote sensing were the most important, but all of the feature categories contributed to improving the model predictions.
 For more detailed information, see \ref{sec-varimp}.
 
-Lastly, we compared the \gls{RF} three-step median model predictions with existing global products that correspond to a particular land cover class in our classification.
-The results are given in table \ref{tab-products}.
+Lastly, the results of the comparison of the \gls{RF} three-step median model predictions with existing global products that correspond to a particular land cover class in our classification are given in table \ref{tab-products}.
 The \gls{RF} three-step median model performed worse than the \gls{GSW} water occurrence history product, but better than the \gls{GFCC} tree cover and \gls{GHSL} built-up products.
 There was a tie when comparing the \gls{RF} three-step median model with the \gls{FROM-GLC} impervious surface product when it comes to \gls{MAE}, but \gls{FROM-GLC} was slightly more accurate according to \gls{RMSE} and less biased according to \gls{ME}.
-
-\begin{sidewaysfigure}
-    \centering
-    \includegraphics[width=\textwidth]{article-figures/maps/2020-10-12-walltowall.png}
-    \caption{Random Forest single model predictions per class. Top row: predicted fractions, each given its own colour (``Overall'' shows a hardened map of dominant land cover using the same colour scheme). Middle row: absolute errors per class, based on predictions at point locations of validation data, displayed aggregated over 1 by 1 degree cells using the mean function. Bottom row: distribution of predicted versus true values, shown as box plots with bins each 10\%, widths representing sample size.}
-    \label{fig-walltowall}
-\end{sidewaysfigure}
 
 \begin{table}
     \centering
@@ -717,10 +711,11 @@ This leads to 100\% error in those cases, which is highly penalised by \gls{RMSE
 Due to this effect, the resulting map is closer to a discrete classification map, with less expressive transition gradients between land cover classes.
 
 A similar effect was seen when using techniques such as median voting for \gls{RF} regression.
-Median voting also resulted in more correct 0\% fraction predictions, but likewise increased the chances of predicting 100\% of the wrong class.
+Like the three-step model, median voting resulted in more correct 0\% fraction predictions, but likewise increased the chances of predicting 100\% of the wrong class.
 Our results showed that median voting has a stronger effect in reducing \gls{MAE} than the multi-step approach.
 Therefore it may be a suitable choice in cases where it is computationally infeasible to train three models.
-However, when the median voting approach was combined with the three-step approach, the \gls{RMSE} decreased without affecting \gls{MAE}.
+However, this approach is only applicable to \gls{RF} models, whereas the three-step approach is generic and can be used with any combination of models.
+In addition, when the median voting approach was combined with the three-step approach, the \gls{RMSE} decreased without affecting \gls{MAE}.
 Thus, three-step median \gls{RF} achieved the best combination that is optimised towards reducing \gls{MAE}, doing so without increasing \gls{RMSE} as much as the single-step median vote model does.
 
 These findings show that the use of a multi-step approach depends on what is more important for the user.
@@ -817,7 +812,7 @@ The combined \gls{RF} median three-step approach obtained the best results for \
 The proposed approach results in predictions of the most likely pure land cover class, when the class is uncertain.
 This is in contrast to predicting a mix of classes when a standard one-step model is used, and therefore is useful for users who are more interested in the most likely class, rather than class probabilities.
 Based on this model, we created a demonstration map showing the global distribution of land cover in separate land cover fraction layers.
-Remote sensing features were the most important for model accuracy, although all other types of features (climate, soil, terrain) also contributed significantly.
+Remote sensing features were the most important for model accuracy, although all other types of features (climate, soil, terrain) also contributed significantly for some classes and thus could not be omitted without negatively affecting the overall model accuracy.
 
 These findings directly contribute to the operationalisation of global land cover fraction mapping by analysing and advancing currently available methods for thematically exhaustive global land cover fraction mapping.
 Information on land cover fractions offers better precision than discrete land cover maps, and allows the users to manually define thresholds to generate discrete classifications of their own choosing, based on their classes on interest.
@@ -828,7 +823,7 @@ Lastly, due to the advances in spatial and spectral resolution, longer imagery t
 %\minisection{Author Contributions}
 %\textbf{Dainius Masiliūnas}: Methodology, Formal Analysis, Software, Writing – Original Draft, Data Curation. \textbf{Nandin-Erdene Tsendbazar}: Investigation, Data Curation, Supervision, Conceptualisation, Writing – review \& editing. \textbf{Martin Herold}: Conceptualisation, Project Administration, Supervision, Methodology. \textbf{Myroslava Lesiv}: Investigation, Data Curation. \textbf{Marcel Buchhorn}: Writing – review \& editing. \textbf{Jan Verbesselt}: Conceptualisation, Methodology, Supervision, Writing – review \& editing.
 
-\minisection{Acknowledgements} We would like to thank VITO and Terrascope for providing us with computational facilities to access and process {PROBA-V} data, and IIASA for providing the model training dataset. In addition, we thank Bruno Smets for ideas and support from the \gls{CGLS-LC100} project, Benjamin Kellenberger for help on tuning \gls{NN} parametrisation, as well as Linlin Li and Tomislav Hengl for suggestions on additional machine learning methods to test. We also thank the three anonymous reviewers for their valuable and detailed comments.
+\minisection{Acknowledgements} We would like to thank VITO and Terrascope for providing us with computational facilities to access and process {PROBA-V} data, and the team of Steffen Fritz (IIASA) for providing the model training dataset. In addition, we thank Bruno Smets for ideas and support from the \gls{CGLS-LC100} project, Devis Tuia for the initial idea for the multi-step approach, Benjamin Kellenberger for help on tuning \gls{NN} parametrisation, as well as Linlin Li and Tomislav Hengl for suggestions on additional machine learning methods to test. We also thank the three anonymous reviewers for their valuable and detailed comments.
 
 %\section*{Abbreviations}
 
@@ -836,13 +831,122 @@ Lastly, due to the advances in spatial and spectral resolution, longer imagery t
 
 \bibliography{article-bib}
 
+\newpage
+
 \appendix
+
+\section{List of features used in regression models} \label{sec-inputdata}
+
+\begin{table}[h!]
+\begin{center}
+\begin{adjustbox}{max width=8cm}
+\begin{tabular}{m{12cm}l}
+\toprule
+\multicolumn{1}{l}{Category \& data source}&\multicolumn{1}{c}{Covariate}\tabularnewline
+\midrule
+Location (3, intrinsic)&
+\begin{tabular}{@{}l@{}}longitude\tabularnewline
+latitude\tabularnewline
+absolute latitude
+\end{tabular}\tabularnewline
+\midrule
+Vegetation indices (22, derived from PROBA-V 100m top-of-canopy reflectance v1.02 \citep{dierckx2014probav})&
+\begin{tabular}{@{}l@{}}
+minimum NDVI\tabularnewline
+maximum NDVI\tabularnewline
+median NDMI\tabularnewline
+NDMI yearly IQR\tabularnewline
+NDMI March-May IQR\tabularnewline
+NDMI June-August IQR\tabularnewline
+NDMI September-November IQR\tabularnewline
+NDMI December-February IQR\tabularnewline
+OSAVI March-May IQR\tabularnewline
+OSAVI June-August IQR\tabularnewline
+OSAVI September-November IQR\tabularnewline
+OSAVI December-February IQR\tabularnewline
+EVI March-May IQR\tabularnewline
+EVI June-August IQR\tabularnewline
+EVI September-November IQR\tabularnewline
+EVI December-February IQR\tabularnewline
+median NIRv\tabularnewline
+NIRv yearly IQR\tabularnewline
+NIRv March-May IQR\tabularnewline
+NIRv June-August IQR\tabularnewline
+NIRv September-November IQR\tabularnewline
+NIRv December-February IQR
+\end{tabular}\tabularnewline
+\midrule
+Temporal metrics (9, derived from a harmonic model over time series of PROBA-V 100m top-of-canopy reflectance v1.02 \citep{dierckx2014probav})&
+\begin{tabular}{@{}l@{}}
+NDVI order 1 cosine\tabularnewline
+NDVI order 1 sine\tabularnewline
+NDVI order 2 cosine\tabularnewline
+NDVI order 2 sine\tabularnewline
+NDVI trend coefficient\tabularnewline
+NDVI order 1 phase\tabularnewline
+NDVI order 1 amplitude\tabularnewline
+NDVI order 2 phase\tabularnewline
+NDVI order 2 amplitude
+\end{tabular}\tabularnewline
+\midrule
+Terrain (4, ASTER GDEM V003 \citep{ASTGTM003})&
+\begin{tabular}{@{}l@{}}
+elevation\tabularnewline
+slope (log-transformed)\tabularnewline
+aspect\tabularnewline
+terrain position index
+\end{tabular}\tabularnewline
+\midrule
+Climate (21, WorldClim 2.0 \citep{worldclim2})&
+\begin{tabular}{@{}l@{}}
+January precipitation (log)\tabularnewline
+April precipitation (log)\tabularnewline
+July precipitation (log)\tabularnewline
+October precipitation (log)\tabularnewline
+January solar irradiance\tabularnewline
+July solar irradiance\tabularnewline
+mean temperature\tabularnewline
+temperature monthly range\tabularnewline
+isothermality\tabularnewline
+temperature annual range\tabularnewline
+annual precipitation (log)\tabularnewline
+temperature seasonality\tabularnewline
+minimum solar irradiance\tabularnewline
+maximum solar irradiance\tabularnewline
+mean solar irradiance\tabularnewline
+mean windspeed\tabularnewline
+mean water vapour pressure\tabularnewline
+coldest month precipitation (log)\tabularnewline
+warmest month precipitation (log)\tabularnewline
+wettest month solar irradiance\tabularnewline
+driest month solar irradiance
+\end{tabular}\tabularnewline
+\midrule
+Soil (8, SoilGrids \citep{hengl_soilgrids250m_2017})&
+\begin{tabular}{@{}l@{}}
+soil available water\tabularnewline
+soil bulk density\tabularnewline
+soil cation exchange capacity (log)\tabularnewline
+soil clay fraction\tabularnewline
+soil coarse fragments (log)\tabularnewline
+soil pH\tabularnewline
+soil sand fraction\tabularnewline
+soil water wilting point
+\end{tabular}\tabularnewline
+\bottomrule
+\end{tabular}
+\end{adjustbox}
+\caption{List of features used as input for the models tested in this study, and their data sources.}
+\label{tab-inputdata}
+\end{center}
+\end{table}
 
 \section{Regression model comparison} \label{sec-model-comparison}
 
 \subsection{Regression models tested in this study}
 
-To test the performance of various regression models for land cover fraction mapping, we tested four types of models: linear models, models based on decision trees, machine learning models not based on decision trees, and ensemble learning (for an overview, see table \ref{tab-methods}).
+Before applying the multi-step approach, we tested the performance of various regression models for land cover fraction mapping.
+We tested four types of models: linear models, models based on decision trees, machine learning models not based on decision trees, and ensemble learning (for an overview, see table \ref{tab-methods}).
 
 %\subsubsection{Linear models}
 
@@ -980,7 +1084,7 @@ Cubist + RF ensemble
 \end{table}
 
 \begin{figure}
-    \includegraphics[width=0.85\textwidth]{article-figures/barplots/2020-06-03-model-comparison-bar}
+    \includegraphics[width=\textwidth]{article-figures/barplots/2020-06-03-model-comparison-bar}
     \caption{Comparison of absolute \gls{RMSE} (top) and absolute \gls{MAE} (bottom) per class of the best performing models in their category, and the equal proportions solution as a reference.}
     \label{fig-models}
 \end{figure}
@@ -1020,7 +1124,7 @@ The difference in the reported numbers may be due to the differences in scale (r
 As we focused on predicting multiple classes, our training dataset intrinsically had higher zero inflation.
 
 \begin{figure}
-    \includegraphics[width=0.85\textwidth]{article-figures/barplots/2020-11-02-model-comparison-bar}
+    \includegraphics[width=\textwidth]{article-figures/barplots/2020-11-02-model-comparison-bar}
     \caption{Comparison of relative RMSE (top) and relative MAE (bottom) per class of the best performing models in their category, and the equal proportions solution as a reference.}
     \label{fig-models-relative}
 \end{figure}
@@ -1052,15 +1156,6 @@ However, due to the limitations of the spectral mixture analysis methods \citep{
 %(as listed in \ref{sec-inputdata}, table \ref{tab-inputdata})
 Modern machine learning methods are advantageous for their ability to model complex nonlinear relationships between variables and thus make use of all of the features.
 %as shown in \ref{sec-varimp}, figure \ref{fig-varimp}.
-
-\section{Model accuracy changes per predicted fraction} \label{sec-apu}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=\textwidth]{article-figures/apuplots/2021-01-13-apu-rf3step.pdf}
-    \caption{Change in accuracy statistics of the \gls{RF} three-step median model per predicted land cover fraction, overlaid over the histogram of predictions. Bins containing less than 10 predictions were removed due to too low sample size leading to unreliable error statistics.}
-    \label{fig-apu}
-\end{figure}
 
 \section{Feature importance} \label{sec-varimp}
 
@@ -1131,114 +1226,16 @@ In addition, model training performance (time for training and memory usage) may
 For example, ensemble learning techniques like the super learner are very resource-intensive and may take weeks to train.
 Therefore for operational land cover product creation purposes, it is important to take into account not just the model accuracy, but also whether the improvement of the accuracy is worth the increase in processing time or computing resource usage.
 
+\section{Model accuracy changes per predicted fraction} \label{sec-apu}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=\textwidth]{article-figures/apuplots/2021-01-13-apu-rf3step.pdf}
+    \caption{Change in accuracy statistics of the \gls{RF} three-step median model per predicted land cover fraction, overlaid over the histogram of predictions. Bins containing less than 10 samples were omitted due to too low sample size leading to unreliable error statistics.}
+    \label{fig-apu}
+\end{figure}
+
 \newpage
-
-\section{List of features used in regression models} \label{sec-inputdata}
-
-\begin{table}[h!]
-\begin{center}
-\begin{adjustbox}{max width=8cm}
-\begin{tabular}{m{12cm}l}
-\toprule
-\multicolumn{1}{l}{Category \& data source}&\multicolumn{1}{c}{Covariate}\tabularnewline
-\midrule
-Location (3, intrinsic)&
-\begin{tabular}{@{}l@{}}longitude\tabularnewline
-latitude\tabularnewline
-absolute latitude
-\end{tabular}\tabularnewline
-\midrule
-Vegetation indices (22, derived from PROBA-V 100m top-of-canopy reflectance v1.02 \citep{dierckx2014probav})&
-\begin{tabular}{@{}l@{}}
-minimum NDVI\tabularnewline
-maximum NDVI\tabularnewline
-median NDMI\tabularnewline
-NDMI yearly IQR\tabularnewline
-NDMI March-May IQR\tabularnewline
-NDMI June-August IQR\tabularnewline
-NDMI September-November IQR\tabularnewline
-NDMI December-February IQR\tabularnewline
-OSAVI March-May IQR\tabularnewline
-OSAVI June-August IQR\tabularnewline
-OSAVI September-November IQR\tabularnewline
-OSAVI December-February IQR\tabularnewline
-EVI March-May IQR\tabularnewline
-EVI June-August IQR\tabularnewline
-EVI September-November IQR\tabularnewline
-EVI December-February IQR\tabularnewline
-median NIRv\tabularnewline
-NIRv yearly IQR\tabularnewline
-NIRv March-May IQR\tabularnewline
-NIRv June-August IQR\tabularnewline
-NIRv September-November IQR\tabularnewline
-NIRv December-February IQR
-\end{tabular}\tabularnewline
-\midrule
-Temporal metrics (9, derived from a harmonic model over time series of PROBA-V 100m top-of-canopy reflectance v1.02 \citep{dierckx2014probav})&
-\begin{tabular}{@{}l@{}}
-NDVI order 1 cosine\tabularnewline
-NDVI order 1 sine\tabularnewline
-NDVI order 2 cosine\tabularnewline
-NDVI order 2 sine\tabularnewline
-NDVI trend coefficient\tabularnewline
-NDVI order 1 phase\tabularnewline
-NDVI order 1 amplitude\tabularnewline
-NDVI order 2 phase\tabularnewline
-NDVI order 2 amplitude
-\end{tabular}\tabularnewline
-\midrule
-Terrain (4, ASTER GDEM V003 \citep{ASTGTM003})&
-\begin{tabular}{@{}l@{}}
-elevation\tabularnewline
-slope (log-transformed)\tabularnewline
-aspect\tabularnewline
-terrain position index
-\end{tabular}\tabularnewline
-\midrule
-Climate (21, WorldClim 2.0 \citep{worldclim2})&
-\begin{tabular}{@{}l@{}}
-January precipitation (log)\tabularnewline
-April precipitation (log)\tabularnewline
-July precipitation (log)\tabularnewline
-October precipitation (log)\tabularnewline
-January solar irradiance\tabularnewline
-July solar irradiance\tabularnewline
-mean temperature\tabularnewline
-temperature monthly range\tabularnewline
-isothermality\tabularnewline
-temperature annual range\tabularnewline
-annual precipitation (log)\tabularnewline
-temperature seasonality\tabularnewline
-minimum solar irradiance\tabularnewline
-maximum solar irradiance\tabularnewline
-mean solar irradiance\tabularnewline
-mean windspeed\tabularnewline
-mean water vapour pressure\tabularnewline
-coldest month precipitation (log)\tabularnewline
-warmest month precipitation (log)\tabularnewline
-wettest month solar irradiance\tabularnewline
-driest month solar irradiance
-\end{tabular}\tabularnewline
-\midrule
-Soil (8, SoilGrids \citep{hengl_soilgrids250m_2017})&
-\begin{tabular}{@{}l@{}}
-soil available water\tabularnewline
-soil bulk density\tabularnewline
-soil cation exchange capacity (log)\tabularnewline
-soil clay fraction\tabularnewline
-soil coarse fragments (log)\tabularnewline
-soil pH\tabularnewline
-soil sand fraction\tabularnewline
-soil water wilting point
-\end{tabular}\tabularnewline
-\bottomrule
-\end{tabular}
-\end{adjustbox}
-\caption{List of features used as input for the models tested in this study, and their data sources.}
-\label{tab-inputdata}
-\end{center}
-\end{table}
-
 \listoffigures
 
 \end{document}
