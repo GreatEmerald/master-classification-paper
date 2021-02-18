@@ -3,14 +3,15 @@
 \journal{Remote Sensing of Environment}
 \bibliographystyle{model5-names}\biboptions{authoryear}
 
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+%\usepackage[utf8]{inputenc}
 \usepackage{lineno}
 \usepackage{microtype}
 \usepackage{amsmath}
 %\usepackage{indentfirst}
 \usepackage{booktabs} % For \toprule, etc.
 \usepackage{textcomp} % for degree sign
+\usepackage[separate-uncertainty=true, multi-part-units=repeat, detect-weight=true]{siunitx}
 %\usepackage[sort&compress,sectionbib]{natbib} % already in elsarticle
 \usepackage{graphicx}
 \usepackage{adjustbox} % For resizing tables
@@ -137,7 +138,7 @@ We compared multiple regression algorithms and implemented our proposed three-st
 We further evaluated the spatial and per-class accuracy of the model and demonstrated a wall-to-wall prediction of seven land cover fractions over the globe. 
 The models were trained on over 138\,000 points and validated on a separate dataset of over 20\,000 points, provided by the \gls{CGLS-LC100} project. Both datasets are global and aligned with the PROBA-V 100 m UTM grid.
 
-Results showed that the random forest regression model reached the lowest RMSE of 17.3\%. Lowest MAE (7.9\%) and highest overall accuracy (72±2\%) was achieved using random forest with our proposed three-model approach and median vote.
+Results showed that the random forest regression model reached the lowest RMSE of 17.3\%. Lowest MAE (7.9\%) and highest overall accuracy (\SI{72 \pm 2}{\percent}) was achieved using random forest with our proposed three-model approach and median vote.
 
 This research proves that machine learning algorithms can be applied globally to map a wide variety of land cover fractions. Fraction mapping expresses land cover more precisely, and empowers users to create their own discrete maps using user-defined thresholds and rules, which enables customising the result for a diverse range of uses. The three-step approach is useful for addressing the zero-inflation issue and mapping 0\% and 100\% fractions more accurately, and thus has already been taken up in the operational production of global land cover fraction layers within the \gls{CGLS-LC100} project. Furthermore, this study contributes to the accuracy assessment of land cover fraction maps both thematically and spatially, and these methods could be taken up by future land cover fraction mapping efforts.
 \end{abstract}
@@ -563,17 +564,17 @@ While it also increases \gls{RMSE}, combining the two concepts together leads to
 \textbf{Model} & \textbf{\ac{RMSE} (\%)} & \textbf{\ac{MAE} (\%)} & $\mathbf{R^2_{NSE}}$ & $\mathbf{R^2_{OLS}}$ (slope/int) & \textbf{\ac{OA} (\%)} & \textbf{Kappa} \\
 \midrule
 \Gls{RF} regression
-& \textbf{17.3}  & 9.4   & \textbf{0.66}  & \textbf{0.67} (1.09/-1.22) & 67±4  & 0.57±0.05 \\
+& \textbf{17.3}  & 9.4   & \textbf{0.66}  & \textbf{0.67} (1.09/-1.22) & \num{67\pm4}  & \num{0.57\pm0.05} \\
 \ensuremath{''} two-step
-& 19.9  & 8.2   & 0.56  & 0.60 (0.78/3.48) & 71±2  & 0.62±0.02 \\
+& 19.9  & 8.2   & 0.56  & 0.60 (0.78/3.48) & \num{71\pm2}  & \num{0.62\pm0.02} \\
 \ensuremath{''} three-step
-& 19.4  & 8.4   & 0.58  & 0.60 (0.84/2.34) & 71±3  & 0.62±0.04 \\
+& 19.4  & 8.4   & 0.58  & 0.60 (0.84/2.34) & \num{71\pm3}  & \num{0.62\pm0.04} \\
 \ensuremath{''} median vote
-& 20.7  & \textbf{7.9}   & 0.52  & 0.60 (0.74/3.80) & 71±1  & 0.63±0.02 \\
+& 20.7  & \textbf{7.9}   & 0.52  & 0.60 (0.74/3.80) & \num{71\pm1}  & \num{0.63\pm0.02} \\
 \ensuremath{''} \ensuremath{''} two-step
-& 20.0  & 8.1   & 0.54  & 0.60 (0.77/3.67) & \textbf{72±1}  & 0.63±0.02 \\
+& 20.0  & 8.1   & 0.54  & 0.60 (0.77/3.67) & \textbf{\num{72\pm1}}  & \num{0.63\pm0.02} \\
 \ensuremath{''} \ensuremath{''} three-step
-& 20.2  & \textbf{7.9}   & 0.54  & 0.60 (0.77/3.34) & \textbf{72±2}  & \textbf{0.64±0.02} \\
+& 20.2  & \textbf{7.9}   & 0.54  & 0.60 (0.77/3.34) & \textbf{\num{72\pm2}}  & \textbf{\num{0.64\pm0.02}} \\
 \bottomrule
 \end{tabular}
 %}
@@ -808,7 +809,7 @@ The challenge here is that the higher uncertainty about fraction estimates may c
 We investigated ways to tackle the issue of accurately predicting the extreme fraction values of 0\% and 100\% by proposing a hierarchical multi-step approach combining classification and regression models.
 This approach was applied to an \gls{RF} regression model, which our tests showed to have the highest accuracy (RMSE: 17.3\%) for land cover fraction mapping compared to other regression algorithms.
 We also combined this approach with \gls{RF} median voting.
-The combined \gls{RF} median three-step approach obtained the best results for \gls{MAE} (7.9\%) and \gls{SCM} \gls{OA} (72±2\%).
+The combined \gls{RF} median three-step approach obtained the best results for \gls{MAE} (7.9\%) and \gls{SCM} \gls{OA} (\SI{72\pm2}{\percent}).
 The proposed approach results in predictions of the most likely pure land cover class, when the class is uncertain.
 This is in contrast to predicting a mix of classes when a standard one-step model is used, and therefore is useful for users who are more interested in the most likely class, rather than class probabilities.
 Based on this model, we created a demonstration map showing the global distribution of land cover in separate land cover fraction layers.
@@ -1056,26 +1057,26 @@ Rather, it weighted in both of the models' predictions, losing the advantages of
 \textbf{Model} & \textbf{\ac{RMSE} (\%)} & \textbf{\ac{MAE} (\%)} & $\mathbf{R^2_{NSE}}$ & $\mathbf{R^2_{OLS}}$ (slope/int) & \textbf{\ac{OA} (\%)} & \textbf{Kappa} \\
 \midrule
 Equal proportions
-& 29.9  & 21.4  & 0     & — & 26±5  & 0.13±0.07 \\
+& 29.9  & 21.4  & 0     & — & \num{26\pm5}  & \num{0.13\pm0.07} \\
 \Glsentryshort{FNC}
-& 24.4  & 13.5  & 0.33  & 0.35 (0.80/2.89) & 53±4  & 0.42±0.06 \\
+& 24.4  & 13.5  & 0.33  & 0.35 (0.80/2.89) & \num{53\pm4}  & \num{0.42\pm0.06} \\
 \Glsentryshort{GLM}, \Glsentryshort{PLS}, Lasso
-& 21.6  & 12.7  & 0.48  & 0.49 (1.10/-1.42) & 56±4  & 0.43±0.05 \\
+& 21.6  & 12.7  & 0.48  & 0.49 (1.10/-1.42) & \num{56\pm4}  & \num{0.43\pm0.05} \\
 \Glsentryshort{MLR}
-& 21.6  & 12.1  & 0.48  & 0.48 (0.96/0.62) & 58±4  & 0.46±0.06 \\
+& 21.6  & 12.1  & 0.48  & 0.48 (0.96/0.62) & \num{58\pm4}  & \num{0.46\pm0.06} \\
 \Glsentryshort{MLP} \glsentryshortpl{NN}
-& 22.7  & 9.2   & 0.43  & 0.52 (0.70/4.25) & 68±1  & 0.57±0.02 \\
+& 22.7  & 9.2   & 0.43  & 0.52 (0.70/4.25) & \num{68\pm1}  & \num{0.57\pm0.02} \\
 \Glsentryshort{SVM} regression
-& 20.7  & 8.9   & 0.52  & 0.56 (0.79/3.02) & 69±2  & 0.58±0.03 \\
+& 20.7  & 8.9   & 0.52  & 0.56 (0.79/3.02) & \num{69\pm2}  & \num{0.58\pm0.03} \\
 Cubist regression
-& 18.1  & \textbf{8.1}   & 0.63  & 0.65 (0.88/1.77) & \textbf{72±2}  & \textbf{0.63±0.03} \\
+& 18.1  & \textbf{8.1}   & 0.63  & 0.65 (0.88/1.77) & \textbf{\num{72\pm2}}  & \textbf{\num{0.63\pm0.03}} \\
 \Glsentryshort{RF} regression
-& \textbf{17.3}  & 9.4   & \textbf{0.66}  & \textbf{0.67} (1.09/-1.22) & 67±4  & 0.57±0.05 \\
+& \textbf{17.3}  & 9.4   & \textbf{0.66}  & \textbf{0.67} (1.09/-1.22) & \num{67\pm4}  & \num{0.57\pm0.05} \\
 \ensuremath{''}
 only RS features
-& 18.4  & 10.3  & 0.62  & 0.64 (1.09/-1.25) & 64±4  & 0.54±0.05 \\
+& 18.4  & 10.3  & 0.62  & 0.64 (1.09/-1.25) & \num{64\pm4}  & \num{0.54\pm0.05} \\
 Cubist + RF ensemble
-& 17.7  & 8.6   & 0.65  & 0.65 (0.95/0.73) & 70±3 & 0.61±0.04 \\
+& 17.7  & 8.6   & 0.65  & 0.65 (0.95/0.73) & \num{70\pm3} & \num{0.61\pm0.04} \\
 \bottomrule
 \end{tabular}
 %}
